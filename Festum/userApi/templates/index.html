@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-messaging.js"></script>
+
+     <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyBYnM-yZS33EZXBi5I0hXZedYoVZCAGZUE",
+            authDomain: "eventopackage-23abd.firebaseapp.com",
+            projectId: "eventopackage-23abd",
+            storageBucket: "eventopackage-23abd.appspot.com",
+            messagingSenderId: "90256714718",
+            appId: "1:90256714718:web:b844e3ad50c2d05ef5cb4f",
+            measurementId: "G-KQ796JS1BW"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        firebase.analytics();
+      
+        const messaging = firebase.messaging();
+        console.log(messaging.getToken())
+        messaging.getToken({ vapidKey: 'BFXjHJljGpA-nau3Uw7Bt9GQ3XfR8b3I_9iiSGQI_vYGxvuv008D_X2rmYcmT4G9r49gg_vGSA-S2CVbfisnWNE' }).then((currentToken) => {
+        if (currentToken) {
+          console.log(currentToken)
+          console.log("Hello")
+        } else {
+          console.log('No registration token available. Request permission to generate one.');
+       
+        }
+      }).catch((err) => {
+        console.log('An error occurred while retrieving token. ', err);
+      });
+      
+      
+        messaging
+         .requestPermission()
+         .then(function () {
+           console.log("Notification permission granted.");
+           return messaging.getToken()
+         })
+         .catch(function (err) {
+         console.log("Unable to get permission to notify.", err);
+       });
+      
+      
+        messaging.onMessage((payload) => {
+        console.log('Message received. ', payload);
+       
+      });
+      
+      
+      
+      </script>
+  
+
+</head>
+
+<body>
+
+</body>
+
+</html>
