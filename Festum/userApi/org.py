@@ -292,7 +292,7 @@ def orgeventApi(request, id=0):
     }, status=400)
 
 
-@api_view(['POST', 'GET', 'PUT'])
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def event_place(request, id=0):
     user = request._user.userId
@@ -338,6 +338,15 @@ def event_place(request, id=0):
             'data': ev_place_serializer.errors,
             'isSuccess': False
         }, status=200)
+    elif request.method == 'DELETE':
+        event = Add_Place_ev.objects.get(Id=id)
+        event.is_active = False
+        event.save()
+        return JsonResponse({
+            'message': "Deleted Successfully",
+            'data': "1",
+                    'isSuccess': True
+        }, status=200)
     return JsonResponse({
         'message': "Connection error",
         'data': '0',
@@ -345,11 +354,15 @@ def event_place(request, id=0):
     }, status=400)
 
 
-@api_view(['POST', 'GET'])
+@api_view(['POST', 'GET', 'PUT'])
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
-def event_service(request):
+def event_service(request, id=0):
+    user = request._user.userId
     if request.method == 'GET':
-        service = Add_service_ev.objects.all()
+        if id != 0:
+            service = Add_service_ev.objects.filter(Id=id, user_id=user)
+        else:
+            service = Add_service_ev.objects.filter(user_id=user)
         services_serializer = addserviceevSerializers(service, many=True)
         return JsonResponse({
             'message': "Data fetch Successfully",
@@ -357,12 +370,28 @@ def event_service(request):
             'isSuccess': True
         }, status=200)
     elif request.method == 'POST':
-        ev_service = JSONParser().parse(request)
-        ev_service_serializer = addserviceevSerializers(data=ev_service)
+        request.data['user'] = user
+        ev_service_serializer = addserviceevSerializers(data=request.data)
         if ev_service_serializer.is_valid():
             ev_service_serializer.save()
             return JsonResponse({
                 'message': "Inserted Successfully",
+                'data': ev_service_serializer.data,
+                'isSuccess': True
+            }, status=200)
+        return JsonResponse({
+            'message': "Insertion Faild",
+            'data': ev_service_serializer.errors,
+            'isSuccess': False
+        }, status=200)
+    elif request.method == 'PUT':
+        request.data['user'] = user
+        service = Add_service_ev.objects.get(Id=id, user_id=user)
+        ev_service_serializer = addserviceevSerializers(service, data=request.data)
+        if ev_service_serializer.is_valid():
+            ev_service_serializer.save()
+            return JsonResponse({
+                'message': "Updated Successfully",
                 'data': ev_service_serializer.data,
                 'isSuccess': True
             }, status=200)
@@ -376,6 +405,19 @@ def event_service(request):
         'data': '0',
         'isSuccess': False
     }, status=400)
+
+
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def event_service_list(request, id=0):
+    if request.method == 'GET':
+        service = Add_service_ev.objects.all()
+        services_serializer = addserviceevSerializers(service, many=True)
+        return JsonResponse({
+            'message': "Data fetch Successfully",
+            'data': services_serializer.data,
+            'isSuccess': True
+        }, status=200)
 
 
 def placedelete(id=0):
@@ -1833,7 +1875,8 @@ def EventCategorylist(request, id=0):
     user = request._user.userId
     if request.method == 'GET':
         if id != 0:
-            eventcategory = EventCategory.objects.filter(categoryId=id, user_id=user)
+            eventcategory = EventCategory.objects.filter(
+                categoryId=id, user_id=user)
         else:
             eventcategory = EventCategory.objects.filter(user_id=user)
         eventcategorylist = EventCategorySerializers(eventcategory, many=True)
@@ -1878,7 +1921,7 @@ def EventCategorylist(request, id=0):
             }, status=200)
 
     elif request.method == 'DELETE':
-        try: 
+        try:
             category = EventCategory.objects.get(categoryId=id, user_id=user)
             category.is_active = False
             category.save()

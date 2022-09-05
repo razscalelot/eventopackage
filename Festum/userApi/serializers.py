@@ -336,6 +336,7 @@ class addserviceevSerializers(serializers.ModelSerializer):
         model = Add_service_ev
         fields = [
             'Id',
+            'user',
             'service_name',
             'service_price',
             'service_price_type',

@@ -65,6 +65,8 @@ urlpatterns = [
     url(r'add_place_event$', org.event_place, name="add_place_event"),
     url(r'add_place_event/([0-9a-zA-Z]+)$', org.event_place, name="add_place_event"),
     url(r'add_service_event$', org.event_service, name="add_service_event"),
+    url(r'add_service_event/([0-9a-zA-Z]+)$', org.event_service, name="add_service_event"),
+    url(r'service_list$', org.event_service_list, name="add_service_event"),
 
     url(r'event_category$', org.EventCategorylist, name="event_category"),
     url(r'event_category_list$', org.Categorylist, name="event_category"),

@@ -182,6 +182,7 @@ SERVICE_PRICE_TYPE_CHOICES = {
 
 
 class Add_service_ev(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     service_name = models.CharField(max_length=500)
     service_price = models.FloatField(max_length=50)
