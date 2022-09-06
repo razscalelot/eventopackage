@@ -428,6 +428,13 @@ class DiscountSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrgDiscountSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = OrgDiscounts
+        fields = '__all__'
+        # fields = ('orguser', 'orgdiscount', 'orgequipment', 'orgdescription', 'orgdiscount_id')
+
+
 class EventCategorySerializers(serializers.ModelSerializer):
    
     class Meta:
@@ -439,6 +446,12 @@ class EventCategorySerializers(serializers.ModelSerializer):
             'user'
         )
         extra_kwargs = {'categoryId': {'read_only': True}}
+
+class addcreateEventSerializers(serializers.ModelSerializer):
+
+    class Meta:
+            model = createEvent
+            fields = '__all__'
 
 
 class createEventSerializers(serializers.ModelSerializer):

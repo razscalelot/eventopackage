@@ -1052,6 +1052,7 @@ def ticketApi(request, id=0):
     }, status=400)
 
 
+
 @api_view(['GET'])
 @allowuser(allowrole=['0', '1', '2', '3'])
 def allticket(request):

@@ -208,23 +208,38 @@ class ServiceImage(models.Model):
 
 
 DISCOUNT_TYPE = {('discount_on_total_bill', 'Discount On Total Bill'),
-                 ('discount_on_equipment_or_item',
-                  'Discount On Equipment Or Item'),
-                 ('advance_and_discount_confirmation',
-                  'Advance And Discount Confirmation')
+                 ('discount_on_equipment_or_item', 'Discount On Equipment Or Item'),
+                 ('advance_and_discount_confirmation', 'Advance And Discount Confirmation')
                  }
 
 
 class Discounts(models.Model):
-    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
-    equipment = models.ForeignKey(Add_service_ev, related_name='equipment', on_delete=models.CASCADE, null=True, blank=True)
+    discountsId = models.AutoField(primary_key=True)
     discount_type = models.CharField(max_length=50, choices=DISCOUNT_TYPE)
     discount = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.discount
+
+
+class OrgDiscounts(models.Model):
+    orgdiscountsId = models.AutoField(primary_key=True)
+    orguser = models.ForeignKey(User, related_name='user',
+                             on_delete=models.CASCADE)
+    orgequipment = models.ForeignKey(
+        Add_service_ev, related_name='orgequipment', on_delete=models.CASCADE, null=True, blank=True)
+    orgdiscount_id = models.ForeignKey(Discounts, on_delete=models.CASCADE)
+    orgdiscount = models.CharField(max_length=100)    
+    orgdescription = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.discount
+
 
 SELECTED_BUSINESS = {
     ('places', 'Have You Place'),
@@ -238,7 +253,7 @@ class createEvent(models.Model):
         max_length=50, choices=SELECTED_BUSINESS, default='places')
     eventId = models.AutoField(primary_key=True)
     e_user = models.ForeignKey(
-        User, related_name='e_user', on_delete=models.CASCADE)
+        User, on_delete=models.CASCADE)
     categoryId = models.ForeignKey(
         EventCategory, related_name='category_id', on_delete=models.CASCADE)
     serivceId = models.ForeignKey(
@@ -336,11 +351,12 @@ class Add_Place_ev(models.Model):
     timestampe = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.place_name
+        return self.place_name  
 
 
 class EventPersonalDetails(models.Model):
     Id = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     eventId = models.ForeignKey(
         createEvent, related_name='personal_details', on_delete=models.CASCADE)
     professional_skill = models.CharField(
@@ -364,6 +380,7 @@ class EventPersonalDetails(models.Model):
 
 
 class EventCompanyDetails(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     eventId = models.ForeignKey(
         createEvent, related_name='company_details', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -476,6 +493,7 @@ class ps_equipments(models.Model):
 
 
 class equipments_pskill(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     pskillid = models.ForeignKey(
         O_PersonalSkills, related_name='Equipment', on_delete=models.CASCADE)
     equpmentId = models.IntegerField(primary_key=True)
@@ -633,6 +651,7 @@ TYPE_CHOICES_ARTIST = {
 
 
 class pc_artist(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     artist = models.CharField(max_length=255)
     price = models.FloatField(max_length=100)
@@ -641,6 +660,7 @@ class pc_artist(models.Model):
 
 
 class pc_decor(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     decor_type = models.CharField(max_length=255)
     decor_price = models.FloatField(max_length=100)
@@ -793,17 +813,20 @@ class Tickets(models.Model):
 
 
 class ForWho(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     for_who = models.IntegerField()
     plan_name = models.CharField(max_length=500)
 
 
 class PersonalSkillCategory(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     category = models.CharField(max_length=500)
 
 
 class PersonalSkillSubCategory(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     pscategoryid = models.ForeignKey(
         PersonalSkillCategory, related_name='SubCategory', on_delete=models.CASCADE)
@@ -811,11 +834,13 @@ class PersonalSkillSubCategory(models.Model):
 
 
 class PartnerCompanyCategory(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     category = models.CharField(max_length=500)
 
 
 class Rooms(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     Id = models.AutoField(primary_key=True)
     user = models.BigIntegerField()
     name = models.TextField(max_length=2500, blank=True)
@@ -867,6 +892,7 @@ def notification_image_filepath(self, filename):
 
 
 class NotificationData(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.AutoField(primary_key=True)
     text = models.TextField(max_length=5000, blank=True)
     image = models.FileField(
@@ -999,6 +1025,7 @@ POSITION_CHOICES = {
 
 
 class Advertisement(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.AutoField(primary_key=True)
     text = models.TextField(max_length=5000, blank=True, null=True)
     link = models.TextField(max_length=5000, blank=True)
@@ -1026,6 +1053,7 @@ class GetInTouch(models.Model):
 
 
 class exceluser(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.AutoField(primary_key=True)
     orgID = models.ForeignKey(
         User, related_name="excelUser", on_delete=models.RESTRICT)

@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=D:\Scalelot\Projects\eventopackage\EPenv
+set VIRTUAL_ENV=D:\FestumEvento\Festum Evento\ChatBot\EventoPackage\EPenv
 
 if not defined PROMPT set PROMPT=$P$G
 

@@ -50,6 +50,9 @@ urlpatterns = [
     url(r'transaction/([0-9a-zA-Z]+)$', views.TransactionApi, name="transaction"),
 
     url(r'redeem$', views.RedeemCoinsApi, name="redeem"),
+    
+    url(r'discount$', org.DiscountView, name="DiscountView"),
+    url(r'discount/([0-9a-zA-Z]+)$', org.DiscountView, name="DiscountView"),
 
     url(r'rateus$', org.orgratsApi, name="rateus"),
     url(r'rateus/([0-9a-zA-Z]+)$', org.orgratsApi, name="rateus"),

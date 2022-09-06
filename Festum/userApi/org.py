@@ -6,8 +6,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.http.response import JsonResponse
 from currency_converter import CurrencyConverter
-from userApi.models import Add_Place_ev, Add_service_ev, EventCategory, ForWho, Place_Events, O_PartnerCompanys, O_PersonalSkills, O_Rats, Image_Event, PartnerCompanyCategory, PersonalSkillCategory, PersonalSkillSubCategory, Servic, User, Video_Event, createEvent, equipments_pc, equipments_pskill, pc_artist, pc_companyphotos, pc_companyvideos, pc_decor, pc_equipments, pc_photos, pc_videos, ps_companyphotos, ps_companyvideos, ps_equipments, ps_photo, ps_video
-from userApi.serializers import EquipmentsPcSerializers, EventCategorySerializers, ForWhoSerializers, Place_EventSerializers, O_PartnercompanySerializers, O_PersonalskillSerializers, O_RatSerializers, PartnerCompanyCategorySerializers, PersonalSkillCategorySerializers, PersonalSkillSubCategorySerializers, RegistrationSerializer, ServicSerializers, addequipmentpsSerializers, addphotopsSerializers, addplaceevSerializers, addserviceevSerializers, addvideopsSerializers, companyphotopsSerializers, companyvideopsSerializers, createEventSerializers, equipments_pskillSerializers, eventimageSerializers, eventvideoSerializers, pc_artistSerializers, pc_companyphotosSerializers, pc_companyvideosSerializers, pc_decorSerializers, pc_equipmentSerializers, pc_photosSerializers, pc_videosSerializers
+from userApi.models import *
+from userApi.serializers import *
 
 # Create your views here.
 
@@ -173,6 +173,7 @@ def liveEvent(request, id):
 @api_view(['POST', 'GET', 'PUT', 'DELETE'])
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def orgeventApi(request, id=0):
+    user = request._user
     if request.method == 'GET':
         user = request._user
         if id != 0:
@@ -247,8 +248,9 @@ def orgeventApi(request, id=0):
                             'isSuccess': True
                             }, status=200)
     elif request.method == 'POST':
-        event_data = JSONParser().parse(request)
-        events_serializer = createEventSerializers(data=event_data)
+        request.data['e_user'] = user.userId
+        print('request.data', request.data)
+        events_serializer = addcreateEventSerializers(data=request.data)
         if events_serializer.is_valid():
             events_serializer.save()
             return JsonResponse({
@@ -387,7 +389,8 @@ def event_service(request, id=0):
     elif request.method == 'PUT':
         request.data['user'] = user
         service = Add_service_ev.objects.get(Id=id, user_id=user)
-        ev_service_serializer = addserviceevSerializers(service, data=request.data)
+        ev_service_serializer = addserviceevSerializers(
+            service, data=request.data)
         if ev_service_serializer.is_valid():
             ev_service_serializer.save()
             return JsonResponse({
@@ -423,6 +426,52 @@ def event_service_list(request, id=0):
 def placedelete(id=0):
     places = Servic.objects.filter(event=id)
     places.delete()
+
+
+@api_view(['GET', 'PUT'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def DiscountView(request, id=0):
+    user = request._user.userId
+    if request.method == 'GET':
+        discount = Discounts.objects.all()
+        discount_serializer = DiscountSerializers(discount, many=True)
+        return JsonResponse({
+            'message': "Data fetch Successfully",
+            'data': discount_serializer.data,
+            'isSuccess': True
+        }, status=200)
+    elif request.method == 'PUT':
+        try:
+            discountID = OrgDiscounts.objects.filter(orgdiscount_id=id).get()
+        except:
+            discountID = Discounts.objects.filter(discountsId=id).get()
+
+        # request.data['orgdiscount_id'] = id
+        # request.data['orguser'] = user
+        discount_per = request.data['orgdiscount']
+        equipment_id = request.data['orgequipment_id']
+        description = request.data['orgdescription']
+
+        print('request.data', request.data)
+        OrgDiscounts.objects.create(orgdiscount=discount_per, orgdescription=description, orgequipment_id=equipment_id, orguser_id=user, orgdiscount_id_id=discountID, is_active=True)
+        # discount_serializer = OrgDiscountSerializers(discountID, data=request.data)
+        if discount_serializer.is_valid():
+            discount_serializer.save()
+            return JsonResponse({
+                'message': "Updated Successfully",
+                'data': discount_serializer.data,
+                'isSuccess': True
+            }, status=200)
+        return JsonResponse({
+            'message': "Insertion Faild",
+            'data': discount_serializer.errors,
+            'isSuccess': False
+        }, status=200)
+    return JsonResponse({
+        'message': "Connection error",
+        'data': '0',
+        'isSuccess': False
+    }, status=400)
 
 
 @api_view(['POST', 'GET', 'DELETE'])

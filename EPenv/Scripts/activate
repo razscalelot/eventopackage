@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\Scalelot\Projects\eventopackage\EPenv"
+VIRTUAL_ENV="D:\FestumEvento\Festum Evento\ChatBot\EventoPackage\EPenv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
