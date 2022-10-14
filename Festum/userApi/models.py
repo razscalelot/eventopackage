@@ -248,6 +248,22 @@ SELECTED_BUSINESS = {
 }
 
 
+class EventType(models.Model):
+    eventId = models.AutoField(primary_key=True)
+    user_id = models.ForeignKey(User, related_name='user_id', on_delete=models.CASCADE)
+    event_type = models.CharField(
+        max_length=50, choices=SELECTED_BUSINESS, default='places')
+    category_id = models.ForeignKey(
+        EventCategory, related_name='category', on_delete=models.CASCADE)
+    display_name = models.CharField(max_length=50)    
+    is_active = models.BooleanField(default=True)
+    timestampe = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.event_type   
+
+
+
 class createEvent(models.Model):
     event_type = models.CharField(
         max_length=50, choices=SELECTED_BUSINESS, default='places')
@@ -341,7 +357,7 @@ class Add_Place_ev(models.Model):
     Id = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(
-        createEvent, related_name='place', on_delete=models.CASCADE)
+        EventType, related_name='event', on_delete=models.CASCADE)
     place_banner = models.ImageField(
         upload_to='place/banner/', null=True, blank=True)
     place_price = models.FloatField(max_length=50)

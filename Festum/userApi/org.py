@@ -1,6 +1,7 @@
 from signal import valid_signals
 from django.db.models import Q
 from sqlalchemy import true
+from yaml import serialize
 from userApi.decorater import allowuser
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, permission_classes
@@ -12,6 +13,72 @@ from userApi.serializers import *
 from itertools import chain
 
 # Create your views here.
+
+
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+@permission_classes([IsAuthenticated])
+def orgEventTypeView(request):
+    user = request._user.userId
+    id = request.GET.get('id', '')
+    if request.method == 'POST':
+        vstatus = False
+        verror = None
+        request.data['user_id'] = user
+        serializer = EventTypeSerializers(data=request.data)
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
+        if vstatus:
+            serializer.save()
+            return JsonResponse({"status": True, "data": serializer.data}, status=200)
+        else:
+            return JsonResponse(
+                {"status": vstatus,
+                 "error": serializer.errors
+                 }, status=406)
+    if request.method == 'GET':
+        if id:
+            eventtype = EventType.objects.filter(
+                is_active=True, user_id=user, eventId=int(id))
+        else:
+            eventtype = EventType.objects.filter(is_active=True, user_id=user)
+        serialize = EventTypeSerializers(eventtype, many=True)
+        return JsonResponse({
+            'message': "Data fetch Successfully",
+            'data': serialize.data,
+            'isSuccess': True
+        }, status=200)
+    elif request.method == 'PUT':
+        request.data['user_id'] = user
+        eventtype = EventType.objects.get(eventId=int(id))
+        serializer = EventTypeSerializers(eventtype, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({
+                'message': "Updeted Successfully",
+                'data': serializer.data,
+                'isSuccess': True
+            }, status=200)
+        return JsonResponse({
+            'message': "Error while updating",
+            'data': serializer.errors,
+            'isSuccess': False
+        }, status=200)
+    elif request.method == 'DELETE':
+        eventtype = EventType.objects.get(eventId=int(id))
+        eventtype.is_active = False
+        eventtype.save()
+        return JsonResponse({
+            'message': "Deleted Successfully",
+            'isSuccess': True
+        }, status=200)
+    return JsonResponse({
+        'message': "Connection error",
+        'data': '0',
+        'isSuccess': False
+    }, status=400)
 
 
 @api_view(['POST', 'GET', 'PUT', 'DELETE'])
@@ -448,7 +515,7 @@ def event_place(request, id=0):
             'data': places_serializer.data,
             'isSuccess': True
         }, status=200)
-    elif request.method == 'POST':
+    elif request.method == 'POST':        
         request.data['user_id'] = user
         ev_place_serializer = addplaceevSerializers(data=request.data)
         if ev_place_serializer.is_valid():
@@ -828,7 +895,8 @@ def eventImage(request):
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def eventVideo(request):
     if request.method == 'GET':
-        vid = Video_Event.objects.filter(event_id=request.GET.get('eventId', 0))
+        vid = Video_Event.objects.filter(
+            event_id=request.GET.get('eventId', 0))
         vids_serializer = eventvideoSerializers(vid, many=True)
         return JsonResponse({
             'message': "video fetch Successfully",
@@ -854,7 +922,6 @@ def eventVideo(request):
                 {"status": vstatus,
                  "error": str(verror)
                  }, status=400)
-
 
 
 @api_view(['POST', 'GET'])
@@ -2044,7 +2111,8 @@ def EventCategorylist(request, id=0):
             eventcategory = EventCategory.objects.filter(
                 categoryId=id, user_id=user, is_active=True)
         else:
-            eventcategory = EventCategory.objects.filter(user_id=user, is_active=True)
+            eventcategory = EventCategory.objects.filter(
+                user_id=user, is_active=True)
         eventcategorylist = EventCategorySerializers(eventcategory, many=True)
         return JsonResponse({
             'message': "Data fetch Successfully",
@@ -2070,7 +2138,8 @@ def EventCategorylist(request, id=0):
     elif request.method == 'PUT':
         request.data['user'] = user
         try:
-            evc = EventCategory.objects.get(categoryId=id, user_id=user, is_active=True)
+            evc = EventCategory.objects.get(
+                categoryId=id, user_id=user, is_active=True)
             evcserializers = EventCategorySerializers(evc, data=request.data)
             if evcserializers.is_valid(raise_exception=True):
                 evcserializers.save()
@@ -2088,7 +2157,8 @@ def EventCategorylist(request, id=0):
 
     elif request.method == 'DELETE':
         try:
-            category = EventCategory.objects.get(categoryId=id, user_id=user, is_active=True)
+            category = EventCategory.objects.get(
+                categoryId=id, user_id=user, is_active=True)
             category.is_active = False
             category.save()
             return JsonResponse({

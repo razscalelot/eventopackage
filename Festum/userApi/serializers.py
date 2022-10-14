@@ -480,6 +480,12 @@ class addcreateEventSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class EventTypeSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = EventType
+        fields = '__all__'
+
+
 class createEventSerializers(serializers.ModelSerializer):
     image = eventimageSerializers(read_only=True, many=True)
     video = eventvideoSerializers(read_only=True, many=True)

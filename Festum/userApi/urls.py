@@ -74,10 +74,12 @@ urlpatterns = [
 
     url(r'events_get_list$', org.orggeteventApi, name="events_get_list"),
     url(r'events_get_list/([0-9a-zA-Z]+)$', org.orggeteventApi, name="events_get_list"),
+
+    url(r'event/type', org.orgEventTypeView, name="orgEventTypeView"),
+    url(r'add_place_event$', org.event_place, name="add_place_event"),
     
     url(r'create_event$', org.craete_event, name="create_event"),
     url(r'create_event/([0-9a-zA-Z]+)$', org.craete_event, name="create_event"),
-    url(r'add_place_event$', org.event_place, name="add_place_event"),
     url(r'add_place_event/([0-9a-zA-Z]+)$', org.event_place, name="add_place_event"),
     url(r'add_service_event$', org.event_service, name="add_service_event"),
     url(r'add_service_event/([0-9a-zA-Z]+)$', org.event_service, name="add_service_event"),
