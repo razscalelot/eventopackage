@@ -1,5 +1,6 @@
 from signal import valid_signals
 from django.db.models import Q
+from sqlalchemy import true
 from userApi.decorater import allowuser
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, permission_classes
@@ -8,6 +9,7 @@ from django.http.response import JsonResponse
 from currency_converter import CurrencyConverter
 from userApi.models import *
 from userApi.serializers import *
+from itertools import chain
 
 # Create your views here.
 
@@ -75,10 +77,10 @@ def orgratsApi(request, id=0):
 def orggeteventApi(request, id=0):
     if request.method == 'GET':
         if id != 0:
-            event = createEvent.objects.filter(live=True, eventId=id)
+            event = createEvent.objects.filter(eventId=id)
             events_serializer = createEventSerializers(event, many=True)
         else:
-            event = createEvent.objects.filter(live=True, is_active=True)
+            event = createEvent.objects.filter(is_active=True)
             events_serializer = createEventSerializers(event, many=True)
 
             search = request.GET.get('search', "")
@@ -250,6 +252,7 @@ def orgeventApi(request, id=0):
     elif request.method == 'POST':
         request.data['e_user'] = user.userId
         print('request.data', request.data)
+        print('personal data')
         events_serializer = addcreateEventSerializers(data=request.data)
         if events_serializer.is_valid():
             events_serializer.save()
@@ -292,6 +295,142 @@ def orgeventApi(request, id=0):
         'data': '0',
         'isSuccess': False
     }, status=400)
+
+
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def orgEventPersonalDetails(request, id=0):
+    if request.method == "POST":
+        print('call')
+        vstatus = False
+        verror = None
+        serializer = EventPersonalDetailsSerializer(data=request.data)
+
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
+
+        if vstatus:
+            serializer.save()
+            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+        else:
+            return JsonResponse(
+                {"status": vstatus,
+                 "error": str(verror)
+                 }, status=200)
+
+
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def orgEventCompanyDetails(request, id=0):
+    if request.method == "GET":
+        print('request.data', request.GET.get('event_reg', 0))
+        companydetail = EventCompanyDetails.objects.filter(
+            eventId=request.GET.get('eventId', 0))
+        serializer = EventCompanyDetailsSerializer(companydetail, many=True)
+        return JsonResponse({
+            'message': "Data fetch Successfully",
+            'data': serializer.data,
+            'isSuccess': True
+        }, status=200)
+
+    if request.method == "POST":
+        vstatus = False
+        verror = None
+        serializer = EventCompanyDetailsSerializer(data=request.data)
+
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
+
+        if vstatus:
+            serializer.save()
+            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+        else:
+            return JsonResponse(
+                {"status": vstatus,
+                 "error": str(verror)
+                 }, status=200)
+
+
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def orgEventCompanyImage(request, id=0):
+    if request.method == "POST":
+        vstatus = False
+        verror = None
+        serializer = EventCompanyImageSerializer(data=request.data)
+
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
+
+        if vstatus:
+            serializer.save()
+            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+        else:
+            return JsonResponse(
+                {"status": vstatus,
+                 "error": str(verror)
+                 }, status=200)
+
+    if request.method == "DELETE":
+
+        images = EventCompanyImage.objects.get(
+            id=str(request.GET.get('id', 0))
+        )
+
+        images.image.delete()
+        images.delete()
+
+        return JsonResponse(
+            {
+                "detail": True,
+            },
+            status=200
+        )
+
+
+@api_view(['POST', 'GET', 'PUT', 'DELETE'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def orgEventCompanyVideo(request, id=0):
+    if request.method == "POST":
+        vstatus = False
+        verror = None
+        serializer = EventCompanyVideoSerializer(data=request.data)
+
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
+
+        if vstatus:
+            serializer.save()
+            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+        else:
+            return JsonResponse(
+                {"status": vstatus,
+                 "error": str(verror)
+                 }, status=200)
+
+    if request.method == "DELETE":
+
+        videos = EventCompanyVideo.objects.get(
+            id=str(request.GET.get('id', 0))
+        )
+
+        videos.video.delete()
+        videos.delete()
+
+        return JsonResponse(
+            {
+                "detail": True,
+            },
+            status=200
+        )
 
 
 @api_view(['POST', 'GET', 'PUT', 'DELETE'])
@@ -453,7 +592,8 @@ def DiscountView(request, id=0):
         description = request.data['orgdescription']
 
         print('request.data', request.data)
-        OrgDiscounts.objects.create(orgdiscount=discount_per, orgdescription=description, orgequipment_id=equipment_id, orguser_id=user, orgdiscount_id_id=discountID, is_active=True)
+        OrgDiscounts.objects.create(orgdiscount=discount_per, orgdescription=description,
+                                    orgequipment_id=equipment_id, orguser_id=user, orgdiscount_id_id=discountID, is_active=True)
         # discount_serializer = OrgDiscountSerializers(discountID, data=request.data)
         if discount_serializer.is_valid():
             discount_serializer.save()
@@ -654,7 +794,8 @@ def craete_event(request, id=0):
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def eventImage(request):
     if request.method == 'GET':
-        img = Image_Event.objects.all()
+        img = Image_Event.objects.filter(
+            event_id=request.GET.get('eventId', 0))
         imgs_serializer = eventimageSerializers(img, many=True)
 
         return JsonResponse({
@@ -662,95 +803,71 @@ def eventImage(request):
             'data': imgs_serializer.data,
             'isSuccess': True
         }, status=200)
+
     elif request.method == 'POST':
-        files = request.data
-        events = files['event']
-        imgdetails = files['image_details']
+        vstatus = False
+        verror = None
+        serializer = eventimageSerializers(data=request.data)
 
-        img = Image_Event.objects.filter(event=files['event'])
-        imgs_serializer = eventimageSerializers(img, many=True)
-        total_img = 20 - len(imgs_serializer.data)
-        if len(imgs_serializer.data) < 20:
-            if len(request.FILES.getlist('image')) <= total_img:
-                for i in request.FILES.getlist('image'):
-                    img_serializer = eventimageSerializers(
-                        data={'event': events, 'image_details': imgdetails, 'image': i})
-                    if img_serializer.is_valid():
-                        img_serializer.save()
-                return JsonResponse({
-                    'message': "You have successfully uploaded " + str(len(request.FILES.getlist('image')))+" photos",
-                    'data': "1",
-                    'isSuccess': True
-                }, status=200)
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
 
-            else:
-                return JsonResponse({
-                    'message': "You can upload maximum " + str(total_img) + " photos, "+"You alredy uploaded " + str(len(imgs_serializer.data)) + " photos",
-                    'data': "0",
-                    'isSuccess': True
-                }, status=200)
+        if vstatus:
+            serializer.save()
+            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
         else:
-            return JsonResponse({
-                'message': "You alredy uploaded " + str(len(imgs_serializer.data)) + " photos",
-                'data': "0",
-                'isSuccess': True
-            }, status=200)
-
-    return JsonResponse({
-        'message': "Insertion Faild",
-        'data': 0,
-        'isSuccess': False
-    }, status=400)
+            return JsonResponse(
+                {"status": vstatus,
+                 "error": str(verror)
+                 }, status=400)
 
 
 @api_view(['POST', 'GET'])
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def eventVideo(request):
     if request.method == 'GET':
-        vid = Video_Event.objects.all()
+        vid = Video_Event.objects.filter(event_id=request.GET.get('eventId', 0))
         vids_serializer = eventvideoSerializers(vid, many=True)
         return JsonResponse({
             'message': "video fetch Successfully",
             'data': vids_serializer.data,
             'isSuccess': True
         }, status=200)
+
     elif request.method == 'POST':
-        files = request.data
-        events = files['event']
+        vstatus = False
+        verror = None
+        serializer = eventvideoSerializers(data=request.data)
 
-        vid = Video_Event.objects.filter(event=files['event'])
-        vids_serializer = eventvideoSerializers(vid, many=True)
-        total_vid = 20 - len(vids_serializer.data)
-        if len(vids_serializer.data) < 20:
-            if len(request.FILES.getlist('video')) <= total_vid:
-                for i in request.FILES.getlist('video'):
-                    vid_serializer = eventvideoSerializers(
-                        data={'event': events, 'video': i})
-                    if vid_serializer.is_valid():
-                        vid_serializer.save()
-                return JsonResponse({
-                    'message': "You have successfully uploaded " + str(len(request.FILES.getlist('video')))+" videos",
-                    'data': "1",
-                    'isSuccess': True
-                }, status=200)
-            else:
-                return JsonResponse({
-                    'message': "You can upload maximum " + str(total_vid) + " videos, " + "You alredy uploaded " + str(len(vids_serializer.data)) + " videos",
-                    'data': "0",
-                    'isSuccess': True
-                }, status=200)
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
+
+        if vstatus:
+            serializer.save()
+            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
         else:
-            return JsonResponse({
-                'message': "You alredy uploaded " + str(len(vids_serializer.data)) + " videos",
-                'data': "0",
-                'isSuccess': True
-            }, status=200)
+            return JsonResponse(
+                {"status": vstatus,
+                 "error": str(verror)
+                 }, status=400)
 
-    return JsonResponse({
-        'message': "Insertion Faild",
-        'data': 0,
-        'isSuccess': False
-    }, status=400)
+
+
+@api_view(['POST', 'GET'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def EntertainmentView(request):
+    if request.method == 'GET':
+        entertaimentImage = Image_Event.objects.all().order_by('-timestamp')
+        image = eventimageSerializers(entertaimentImage, many=True)
+        entertaimentVideo = Video_Event.objects.all().order_by('-timestamp')
+        video = eventvideoSerializers(entertaimentVideo, many=True)
+        data = list(chain(image.data, video.data))
+
+        return JsonResponse({"status": True, "detail": data}, status=200)
 
 
 # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ personal Skill
@@ -1707,7 +1824,7 @@ def perc_decors(request):
             'message': "Insertion Faild",
             'data': decor_serializer.errors,
             'isSuccess': False
-        }, status=400)
+        }, status=200)
     return JsonResponse({
         'message': "Connection error",
         'data': '0',
@@ -1925,9 +2042,9 @@ def EventCategorylist(request, id=0):
     if request.method == 'GET':
         if id != 0:
             eventcategory = EventCategory.objects.filter(
-                categoryId=id, user_id=user)
+                categoryId=id, user_id=user, is_active=True)
         else:
-            eventcategory = EventCategory.objects.filter(user_id=user)
+            eventcategory = EventCategory.objects.filter(user_id=user, is_active=True)
         eventcategorylist = EventCategorySerializers(eventcategory, many=True)
         return JsonResponse({
             'message': "Data fetch Successfully",
@@ -1953,7 +2070,7 @@ def EventCategorylist(request, id=0):
     elif request.method == 'PUT':
         request.data['user'] = user
         try:
-            evc = EventCategory.objects.get(categoryId=id, user_id=user)
+            evc = EventCategory.objects.get(categoryId=id, user_id=user, is_active=True)
             evcserializers = EventCategorySerializers(evc, data=request.data)
             if evcserializers.is_valid(raise_exception=True):
                 evcserializers.save()
@@ -1971,7 +2088,7 @@ def EventCategorylist(request, id=0):
 
     elif request.method == 'DELETE':
         try:
-            category = EventCategory.objects.get(categoryId=id, user_id=user)
+            category = EventCategory.objects.get(categoryId=id, user_id=user, is_active=True)
             category.is_active = False
             category.save()
             return JsonResponse({
@@ -1992,7 +2109,7 @@ def EventCategorylist(request, id=0):
 def Categorylist(request, id=0):
     if request.method == 'GET':
         user = request._user
-        eventcategory = EventCategory.objects.all()
+        eventcategory = EventCategory.objects.filter(is_active=True)
         eventcategorylist = EventCategorySerializers(eventcategory, many=True)
         return JsonResponse({
             'message': "Data fetch Successfully",
@@ -2274,19 +2391,19 @@ def PartnerCompanyCategorylist(request, id=0):
 @permission_classes([IsAuthenticated])
 def GalleryImageApi(request):
     if request.method == 'GET':
-        img1 = Image_Event.objects.filter(live=True)
+        img1 = Image_Event.objects.all()
         imgs_serializer1 = eventimageSerializers(img1, many=True)
 
-        img2 = pc_photos.objects.filter(live=True)
+        img2 = pc_photos.objects.all()
         imgs_serializer2 = pc_photosSerializers(img2, many=True)
 
-        img3 = pc_companyphotos.objects.filter(live=True)
+        img3 = pc_companyphotos.objects.all()
         imgs_serializer3 = pc_companyphotosSerializers(img3, many=True)
 
-        img4 = ps_photo.objects.filter(live=True)
+        img4 = ps_photo.objects.all()
         imgs_serializer4 = addphotopsSerializers(img4, many=True)
 
-        img5 = ps_companyphotos.objects.filter(live=True)
+        img5 = ps_companyphotos.objects.all()
         imgs_serializer5 = companyphotopsSerializers(img5, many=True)
         return JsonResponse({
             'message': "Image fetch Successfully",
@@ -2308,22 +2425,22 @@ def GalleryImageApi(request):
 @permission_classes([IsAuthenticated])
 def GalleryVideoApi(request):
     if request.method == 'GET':
-        vid1 = Video_Event.objects.filter(live=True)
+        vid1 = Video_Event.objects.all()
         vids_serializer1 = eventvideoSerializers(vid1, many=True)
 
-        vid2 = pc_videos.objects.filter(live=True)
+        vid2 = pc_videos.objects.all()
         vids_serializer2 = pc_videosSerializers(vid2, many=True)
 
-        vid3 = pc_companyvideos.objects.filter(live=True)
+        vid3 = pc_companyvideos.objects.all()
         vids_serializer3 = pc_companyvideosSerializers(vid3, many=True)
 
-        vid4 = ps_video.objects.filter(live=True)
+        vid4 = ps_video.objects.all()
         vids_serializer4 = addvideopsSerializers(vid4, many=True)
 
-        vid5 = ps_companyvideos.objects.filter(live=True)
+        vid5 = ps_companyvideos.objects.all()
         vids_serializer5 = companyvideopsSerializers(vid5, many=True)
         return JsonResponse({
-            'message': "Image fetch Successfully",
+            'message': "Video fetch Successfully",
             'data': vids_serializer1.data +
             vids_serializer2.data +
             vids_serializer3.data +

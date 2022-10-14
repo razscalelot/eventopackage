@@ -57,14 +57,26 @@ urlpatterns = [
     url(r'rateus$', org.orgratsApi, name="rateus"),
     url(r'rateus/([0-9a-zA-Z]+)$', org.orgratsApi, name="rateus"),
 
-    url(r'events$', org.orgeventApi, name="events"),
-    url(r'events_get_list$', org.orggeteventApi, name="events_get_list"),
-    url(r'events_get_list/([0-9a-zA-Z]+)$', org.orggeteventApi, name="events_get_list"),
-    url(r'events/([0-9a-zA-Z]+)$', org.orgeventApi, name="events"),
-    url(r'create_event$', org.craete_event, name="create_event"),
-    url(r'create_event/([0-9a-zA-Z]+)$', org.craete_event, name="create_event"),
+
     url(r'image_event$', org.eventImage, name="image_event"),
     url(r'video_event$', org.eventVideo, name="video_event"),
+
+    url(r"entertainment$", org.EntertainmentView, name='EntertainmentView'),
+
+    url(r'events/personaldetail$', org.orgEventPersonalDetails, name="orgEventPersonalDetails"),
+
+    url(r'events/companydetail$', org.orgEventCompanyDetails, name="orgEventCompanyDetails"),    
+    url(r'events/companydetail/image$', org.orgEventCompanyImage, name="orgEventCompanyImage"),
+    url(r'events/companydetail/video$', org.orgEventCompanyVideo, name="orgEventCompanyVideo"),
+    
+    url(r'events$', org.orgeventApi, name="events"),
+    url(r'events/([0-9a-zA-Z]+)$', org.orgeventApi, name="events"),
+
+    url(r'events_get_list$', org.orggeteventApi, name="events_get_list"),
+    url(r'events_get_list/([0-9a-zA-Z]+)$', org.orggeteventApi, name="events_get_list"),
+    
+    url(r'create_event$', org.craete_event, name="create_event"),
+    url(r'create_event/([0-9a-zA-Z]+)$', org.craete_event, name="create_event"),
     url(r'add_place_event$', org.event_place, name="add_place_event"),
     url(r'add_place_event/([0-9a-zA-Z]+)$', org.event_place, name="add_place_event"),
     url(r'add_service_event$', org.event_service, name="add_service_event"),

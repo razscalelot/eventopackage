@@ -5,6 +5,7 @@ from django.db.models.fields import BigIntegerField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from sqlalchemy import null
 
 # from sqlalchemy import null, true
 from userApi.utils import generate_ref_code, TicketNum
@@ -169,7 +170,6 @@ class EventCategory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     categoryId = models.AutoField(primary_key=True)
     category_name = models.CharField(max_length=500)
-    display_name = models.CharField(max_length=500, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     timestampe = models.DateTimeField(auto_now_add=True)
 
@@ -258,6 +258,7 @@ class createEvent(models.Model):
         EventCategory, related_name='category_id', on_delete=models.CASCADE)
     serivceId = models.ForeignKey(
         Add_service_ev, related_name='service_id', on_delete=models.CASCADE)
+    placeId = models.ForeignKey('Add_Place_ev', related_name='service_id', on_delete=models.CASCADE)
     display_name = models.CharField(max_length=50)
     t_and_c = models.TextField(max_length=5000)
     facebook = models.CharField(max_length=255, blank=True, null=True)
@@ -367,6 +368,9 @@ class EventPersonalDetails(models.Model):
     alt_mobile_no = models.CharField(max_length=20, blank=True, null=True)
     email = models.CharField(max_length=100)
     is_email_hidden = models.BooleanField(default=True)
+    skill_banner = models.FileField(upload_to='personal_details/banner/', null=True, blank=True)
+    price_type = models.CharField(
+        max_length=255, choices=PLACE_PRICE_TYPE_CHOICES, default=0)
     flat_no = models.CharField(max_length=100, blank=True, null=True)
     street = models.CharField(max_length=100, blank=True, null=True)
     area = models.CharField(max_length=50, blank=True, null=True)
@@ -388,6 +392,7 @@ class EventCompanyDetails(models.Model):
         max_length=255, upload_to='image/events/company/gst')
     contact_no = models.CharField(max_length=255)
     email = models.CharField(max_length=255)
+    about = models.TextField(blank=True, null=True)
     flat_no = models.CharField(max_length=255)
     street = models.CharField(max_length=255)
     area = models.CharField(max_length=255)
@@ -403,7 +408,7 @@ class EventCompanyDetails(models.Model):
 class EventCompanyImage(models.Model):
     company_id = models.ForeignKey(
         EventCompanyDetails, related_name='image', on_delete=models.CASCADE)
-    image = models.ImageField(
+    image = models.FileField(
         upload_to='image/events/company', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -414,7 +419,7 @@ class EventCompanyImage(models.Model):
 class EventCompanyVideo(models.Model):
     company_id = models.ForeignKey(
         EventCompanyDetails, related_name='video', on_delete=models.CASCADE)
-    video = models.ImageField(
+    video = models.FileField(
         upload_to='image/events/company/video', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 

@@ -509,23 +509,26 @@ def forgotpassApi(request):
 def updateuser(request):
     if request.method == 'PUT':
         user = request.user.userId
-        name = request.data["name"]
+        # name = request.data["name"]
+        getuser = User.objects.filter(userId=user)
+        serializer = RegistrationSerializer(getuser, many=True)
+        print(serializer.data)
 
-        if name:
-            User.objects.filter(userId=user).update(name=str(name))
-        if request.data["email"]:
-            User.objects.filter(userId=user).update(
-                email=str(request.data["email"]))
-        if request.data["phone_no"]:
-            User.objects.filter(userId=user).update(
-                phone_no=str(request.data["phone_no"]))
-        if request.data["profile_img"]:
-            m = User.objects.get(userId=user)
-            m.profile_img = request.FILES["profile_img"]
-            m.save()
+        # if name:
+        #     User.objects.filter(userId=user).update(name=str(name))
+        # if request.data["email"]:
+        #     User.objects.filter(userId=user).update(
+        #         email=str(request.data["email"]))
+        # if request.data["phone_no"]:
+        #     User.objects.filter(userId=user).update(
+        #         phone_no=str(request.data["phone_no"]))
+        # if request.data["profile_img"]:
+        #     m = User.objects.get(userId=user)
+        #     m.profile_img = request.FILES["profile_img"]
+        #     m.save()
         return JsonResponse({
             'message': "Your profile is updated Successfully",
-            'data': 1,
+            'data': serializer.data,
             'isSuccess': True
         }, status=200)
     return JsonResponse({

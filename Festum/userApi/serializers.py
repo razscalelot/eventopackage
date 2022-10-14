@@ -120,7 +120,6 @@ class TicketSerializer(serializers.ModelSerializer):
 
 class RegistrationSerializer(serializers.ModelSerializer):
 
-
     class Meta:
         model = User
         fields = ['userId', 'email', 'name', 'phone_no', 'password',
@@ -128,8 +127,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}, 'Wishlist': {'read_only': True}, 'Refers': {'read_only': True}, 'Tickets': {'read_only': True}, 'otp': {'read_only': True}
         }
-
-   
 
 
 def checkPassword(self, **kwargs):
@@ -353,7 +350,6 @@ class eventimageSerializers(serializers.ModelSerializer):
             'event',
             'image',
             'image_details',
-            'live'
         ]
         extra_kwargs = {'id': {'read_only': True}}
 
@@ -365,7 +361,8 @@ class eventvideoSerializers(serializers.ModelSerializer):
             'id',
             'event',
             'video',
-            'live'
+            'thumbnail',
+            'detail'
         ]
         extra_kwargs = {'id': {'read_only': True}}
 
@@ -378,8 +375,37 @@ class EventPersonalDetailsSerializer(serializers.ModelSerializer):
 
 
 class EventCompanyDetailsSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    video = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_image(obj):
+        image_id = EventCompanyImage.objects.filter(company_id=obj.id)
+        image = EventCompanyImageSerializer(image_id, many=True)
+        return image.data
+
+    @staticmethod
+    def get_video(obj):
+        video_id = EventCompanyVideo.objects.filter(company_id=obj.id)
+        video = EventCompanyVideoSerializer(video_id, many=True)
+        return video.data
+
     class Meta:
         model = EventCompanyDetails
+        fields = '__all__'
+        extra_kwargs = {'id': {'read_only': True}}
+
+
+class EventCompanyImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventCompanyImage
+        fields = '__all__'
+        extra_kwargs = {'id': {'read_only': True}}
+
+
+class EventCompanyVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventCompanyVideo
         fields = '__all__'
         extra_kwargs = {'id': {'read_only': True}}
 
@@ -436,22 +462,22 @@ class OrgDiscountSerializers(serializers.ModelSerializer):
 
 
 class EventCategorySerializers(serializers.ModelSerializer):
-   
+
     class Meta:
         model = EventCategory
         fields = (
             'categoryId',
             'category_name',
-            'display_name',
             'user'
         )
         extra_kwargs = {'categoryId': {'read_only': True}}
 
+
 class addcreateEventSerializers(serializers.ModelSerializer):
 
     class Meta:
-            model = createEvent
-            fields = '__all__'
+        model = createEvent
+        fields = '__all__'
 
 
 class createEventSerializers(serializers.ModelSerializer):
@@ -464,13 +490,13 @@ class createEventSerializers(serializers.ModelSerializer):
     personal_details = serializers.SerializerMethodField()
     company_details = serializers.SerializerMethodField()
     place_event = Place_EventSerializers(read_only=True, many=True)
-    discountId = serializers.SerializerMethodField()
+    # discountId = serializers.SerializerMethodField()
 
-    @staticmethod
-    def get_discountId(obj):
-        discount = Discounts.objects.filter(id=obj.discountId)
-        discountId = DiscountSerializers(discount, many=True)
-        return discountId.data
+    # @staticmethod
+    # def get_discountId(obj):
+    #     discount = Discounts.objects.filter(id=obj.discountId)
+    #     discountId = DiscountSerializers(discount, many=True)
+    #     return discountId.data
 
     @staticmethod
     def get_company_details(obj):
@@ -492,8 +518,8 @@ class createEventSerializers(serializers.ModelSerializer):
 
     @staticmethod
     def get_placeId(obj):
-        place = Add_Place_ev.objects.filter(Id=obj.placeId)
-        placeId = addplaceevSerializers(place)
+        place = Add_Place_ev.objects.filter(event_id=obj.placeId)
+        placeId = addplaceevSerializers(place, many=True)
         return placeId.data
 
     class Meta:
@@ -501,7 +527,7 @@ class createEventSerializers(serializers.ModelSerializer):
         fields = ('eventId', 'event_type', 'display_name', 'live', 'image',
                   'video', 'e_user', 'categoryId', 'serivceId', 'placeId', 'personal_details', 'company_details',
                   'place_event', 't_and_c', 'facebook', 'twitter', 'youtube', 'pinterest', 'instagram', 'linkedin',
-                  'discountId', 'calender', 'is_active', 'timestampe')
+                  'calender', 'is_active', 'timestampe')
 
     # EventRating = O_RatSerializers(read_only=True, many=True)
     # EventWishlist = WishlistSerializer(read_only=True, many=True)
