@@ -253,9 +253,10 @@ class EventType(models.Model):
     user_id = models.ForeignKey(User, related_name='user_id', on_delete=models.CASCADE)
     event_type = models.CharField(
         max_length=50, choices=SELECTED_BUSINESS, default='places')
-    category_id = models.ForeignKey(
+    categoryId = models.ForeignKey(
         EventCategory, related_name='category', on_delete=models.CASCADE)
-    display_name = models.CharField(max_length=50)    
+    display_name = models.CharField(max_length=50)   
+    live = models.BooleanField(default=False) 
     is_active = models.BooleanField(default=True)
     timestampe = models.DateTimeField(auto_now_add=True)
 
@@ -265,17 +266,10 @@ class EventType(models.Model):
 
 
 class createEvent(models.Model):
-    event_type = models.CharField(
-        max_length=50, choices=SELECTED_BUSINESS, default='places')
-    eventId = models.AutoField(primary_key=True)
-    e_user = models.ForeignKey(
-        User, on_delete=models.CASCADE)
-    categoryId = models.ForeignKey(
-        EventCategory, related_name='category_id', on_delete=models.CASCADE)
-    serivceId = models.ForeignKey(
-        Add_service_ev, related_name='service_id', on_delete=models.CASCADE)
-    placeId = models.ForeignKey('Add_Place_ev', related_name='service_id', on_delete=models.CASCADE)
-    display_name = models.CharField(max_length=50)
+    event_id = models.ForeignKey(EventType, related_name='event_id', on_delete=models.CASCADE)
+    e_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    serivceId = models.ForeignKey(Add_service_ev, related_name='service_id', on_delete=models.CASCADE)
+    discountId = models.ForeignKey(OrgDiscounts, related_name='discount_id', on_delete=models.CASCADE)
     t_and_c = models.TextField(max_length=5000)
     facebook = models.CharField(max_length=255, blank=True, null=True)
     twitter = models.CharField(max_length=255, blank=True, null=True)
@@ -283,7 +277,6 @@ class createEvent(models.Model):
     pinterest = models.CharField(max_length=255, blank=True, null=True)
     instagram = models.CharField(max_length=255, blank=True, null=True)
     linkedin = models.CharField(max_length=255, blank=True, null=True)
-    discountId = models.CharField(max_length=50)
     calender = models.CharField(max_length=255)
     live = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -293,9 +286,38 @@ class createEvent(models.Model):
         return self.display_name
 
 
+# class createEvent(models.Model):
+#     event_type = models.CharField(
+#         max_length=50, choices=SELECTED_BUSINESS, default='places')
+#     eventId = models.AutoField(primary_key=True)
+#     e_user = models.ForeignKey(
+#         User, on_delete=models.CASCADE)
+#     categoryId = models.ForeignKey(
+#         EventCategory, related_name='category_id', on_delete=models.CASCADE)
+#     serivceId = models.ForeignKey(
+#         Add_service_ev, related_name='service_id', on_delete=models.CASCADE)
+#     placeId = models.ForeignKey('Add_Place_ev', related_name='service_id', on_delete=models.CASCADE)
+#     display_name = models.CharField(max_length=50)
+#     t_and_c = models.TextField(max_length=5000)
+#     facebook = models.CharField(max_length=255, blank=True, null=True)
+#     twitter = models.CharField(max_length=255, blank=True, null=True)
+#     youtube = models.CharField(max_length=255, blank=True, null=True)
+#     pinterest = models.CharField(max_length=255, blank=True, null=True)
+#     instagram = models.CharField(max_length=255, blank=True, null=True)
+#     linkedin = models.CharField(max_length=255, blank=True, null=True)
+#     discountId = models.CharField(max_length=50)
+#     calender = models.CharField(max_length=255)
+#     live = models.BooleanField(default=False)
+#     is_active = models.BooleanField(default=True)
+#     timestampe = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return self.display_name
+
+
 class Image_Event(models.Model):
     event = models.ForeignKey(
-        createEvent, related_name='image', on_delete=models.CASCADE)
+        EventType, related_name='image', on_delete=models.CASCADE)
     image = models.FileField(upload_to='event/image/')
     image_details = models.CharField(max_length=255, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -306,7 +328,7 @@ class Image_Event(models.Model):
 
 class Video_Event(models.Model):
     event = models.ForeignKey(
-        createEvent, related_name='video', on_delete=models.CASCADE)
+        EventType, related_name='video', on_delete=models.CASCADE)
     video = models.FileField(upload_to='event/video/')
     thumbnail = models.ImageField(
         upload_to='event/video/thumbnail/', null=True, blank=True)
@@ -326,7 +348,7 @@ PLACES_EVENT_FACILITIES = {
 
 class Place_Events(models.Model):
     event = models.ForeignKey(
-        createEvent, related_name='place_event', on_delete=models.CASCADE)
+        EventType, related_name='place_event', on_delete=models.CASCADE)
     IncludingFacilities = models.CharField(
         max_length=100, choices=PLACES_EVENT_FACILITIES, default='romantic_stay')
     person_capacity = models.FloatField(max_length=250)
@@ -375,7 +397,7 @@ class EventPersonalDetails(models.Model):
     Id = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     eventId = models.ForeignKey(
-        createEvent, related_name='personal_details', on_delete=models.CASCADE)
+        EventType, related_name='personal_details', on_delete=models.CASCADE)
     professional_skill = models.CharField(
         max_length=255, blank=True, null=True)
     full_name = models.CharField(max_length=255)
@@ -402,7 +424,7 @@ class EventPersonalDetails(models.Model):
 class EventCompanyDetails(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     eventId = models.ForeignKey(
-        createEvent, related_name='company_details', on_delete=models.CASCADE)
+        EventType, related_name='company_details', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     gst = models.FileField(
         max_length=255, upload_to='image/events/company/gst')
@@ -755,7 +777,7 @@ class Wishlists(models.Model):
     user = models.ForeignKey(
         User, related_name='Wishlist', on_delete=models.CASCADE)
     eventId = models.ForeignKey(
-        createEvent, related_name="EventWishlist", on_delete=models.CASCADE, null=True)
+        EventType, related_name="EventWishlist", on_delete=models.CASCADE, null=True)
     partnerId = models.ForeignKey(
         O_PartnerCompanys, related_name="PartnerCompWishlist", on_delete=models.CASCADE, null=True)
     personalId = models.ForeignKey(
@@ -771,7 +793,7 @@ class Wishlists(models.Model):
 class O_Rats(models.Model):
     User = models.ForeignKey(User, on_delete=models.CASCADE)
     eventId = models.ForeignKey(
-        createEvent, related_name="EventRating", on_delete=models.CASCADE, null=True)
+        EventType, related_name="EventRating", on_delete=models.CASCADE, null=True)
     partnerId = models.ForeignKey(
         O_PartnerCompanys, related_name="PartnerCompRating", on_delete=models.CASCADE, null=True)
     personalId = models.ForeignKey(
@@ -787,7 +809,7 @@ class O_Rats(models.Model):
 class Checkouts(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     eventId = models.ForeignKey(
-        createEvent, related_name="EventCheckout", on_delete=models.CASCADE, null=True)
+        EventType, related_name="EventCheckout", on_delete=models.CASCADE, null=True)
     partnerId = models.ForeignKey(
         O_PartnerCompanys, related_name="PartnerComCheckout", on_delete=models.CASCADE, null=True)
     personalSkillId = models.ForeignKey(
@@ -806,7 +828,7 @@ class Tickets(models.Model):
     holdername = models.TextField(max_length=5000, null=True, blank=True)
     holdercontact = models.CharField(max_length=225, null=True)
     eventId = models.ForeignKey(
-        createEvent, related_name="EventTickets", on_delete=models.CASCADE, null=True)
+        EventType, related_name="EventTickets", on_delete=models.CASCADE, null=True)
     partnerId = models.ForeignKey(
         O_PartnerCompanys, related_name="PartnerComTickets", on_delete=models.CASCADE, null=True)
     personalSkillId = models.ForeignKey(

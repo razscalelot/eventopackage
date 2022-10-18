@@ -144,11 +144,11 @@ def orgratsApi(request, id=0):
 def orggeteventApi(request, id=0):
     if request.method == 'GET':
         if id != 0:
-            event = createEvent.objects.filter(eventId=id)
-            events_serializer = createEventSerializers(event, many=True)
+            event = EventType.objects.filter(eventId=id)
+            events_serializer = OrgEventTypeSerializers(event, many=True)
         else:
-            event = createEvent.objects.filter(is_active=True)
-            events_serializer = createEventSerializers(event, many=True)
+            event = EventType.objects.filter(is_active=True)
+            events_serializer = OrgEventTypeSerializers(event, many=True)
 
             search = request.GET.get('search', "")
             place_name = request.GET.get('place_name', "")
@@ -158,7 +158,7 @@ def orggeteventApi(request, id=0):
             max_personcapacity = request.GET.get('max_personcapacity', "")
 
             if search:
-                product = createEvent.objects.filter(Q(event__place_name__icontains=search) | Q(event__address__icontains=search) |
+                product = EventType.objects.filter(Q(event__place_name__icontains=search) | Q(event__address__icontains=search) |
                                                      Q(category__icontains=search) | Q(display_name__icontains=search) | Q(
                                                          event__person_capacity__icontains=search)
                                                      | Q(event__for_who__icontains=search) | Q(event__place_name__icontains=search) | Q(event__place_price__icontains=search) |
@@ -167,24 +167,24 @@ def orggeteventApi(request, id=0):
                                                      Q(event__facebook__icontains=search) | Q(event__youtube__icontains=search) | Q(event__twitter__icontains=search) |
                                                      Q(event__pinterest__icontains=search) | Q(event__instagram__icontains=search) |
                                                      Q(event__vimeo__icontains=search) | Q(price__icontains=search))
-                events_serializer = createEventSerializers(product, many=True)
+                events_serializer = OrgEventTypeSerializers(product, many=True)
             else:
-                product = createEvent.objects.filter(live=True)
-                events_serializer = createEventSerializers(event, many=True)
+                product = EventType.objects.filter(live=True)
+                events_serializer = OrgEventTypeSerializers(event, many=True)
 
             if place_name:
                 product = product.filter(
                     Q(event__place_name__icontains=place_name))
-                events_serializer = createEventSerializers(product, many=True)
+                events_serializer = OrgEventTypeSerializers(product, many=True)
 
             if address:
                 product = product.filter(Q(event__address__icontains=address))
-                events_serializer = createEventSerializers(product, many=True)
+                events_serializer = OrgEventTypeSerializers(product, many=True)
 
             if price:
                 p = int(price)
                 product = product.filter(price__lte=p)
-                events_serializer = createEventSerializers(product, many=True)
+                events_serializer = OrgEventTypeSerializers(product, many=True)
 
             if min_personcapacity:
                 if max_personcapacity:
@@ -192,7 +192,7 @@ def orggeteventApi(request, id=0):
                     max = int(max_personcapacity)
                     product = product.filter(
                         event__person_capacity__gte=min, event__person_capacity__lte=max)
-                    events_serializer = createEventSerializers(
+                    events_serializer = OrgEventTypeSerializers(
                         product, many=True)
 
         return JsonResponse({
@@ -246,9 +246,9 @@ def orgeventApi(request, id=0):
     if request.method == 'GET':
         user = request._user
         if id != 0:
-            event = createEvent.objects.filter(
-                e_user_id=user.userId, eventId=id)
-            events_serializer = createEventSerializers(event, many=True)
+            event = EventType.objects.filter(
+                user_id=user.userId, eventId=id)
+            events_serializer = OrgEventTypeSerializers(event, many=True)
 
             catdata = EventCategory.objects.all()
             cat_serializer = EventCategorySerializers(catdata, many=True)
@@ -269,19 +269,19 @@ def orgeventApi(request, id=0):
                         cadata = catserializers.data
                         for j in cadata:
                             category = j["category"]
-                        ev = createEvent.objects.filter(
-                            e_user_id=user.userId, eventId=id)
+                        ev = EventType.objects.filter(
+                            user_id=user.userId, eventId=id)
                         for e in ev:
                             e.category = category
                             e.save()
-                    event = createEvent.objects.filter(
-                        e_user_id=user.userId, eventId=id)
-                    events_serializer = createEventSerializers(
+                    event = EventType.objects.filter(
+                        user_id=user.userId, eventId=id)
+                    events_serializer = OrgEventTypeSerializers(
                         event, many=True)
 
         else:
-            event = createEvent.objects.filter(e_user_id=user.userId)
-            events_serializer = createEventSerializers(event, many=True)
+            event = EventType.objects.filter(user_id=user.userId)
+            events_serializer = OrgEventTypeSerializers(event, many=True)
 
             catdata = EventCategory.objects.all()
             cat_serializer = EventCategorySerializers(catdata, many=True)
@@ -302,13 +302,13 @@ def orgeventApi(request, id=0):
                         cadata = catserializers.data
                         for j in cadata:
                             category = j["category"]
-                        ev = createEvent.objects.filter(
-                            e_user_id=user.userId, categoryId=catid)
+                        ev = EventType.objects.filter(
+                            user_id=user.userId, categoryId=catid)
                         for e in ev:
                             e.category = category
                             e.save()
-                    event = createEvent.objects.filter(e_user_id=user.userId)
-                    events_serializer = createEventSerializers(
+                    event = EventType.objects.filter(user_id=user.userId)
+                    events_serializer = OrgEventTypeSerializers(
                         event, many=True)
 
         return JsonResponse({
@@ -380,10 +380,10 @@ def orgEventPersonalDetails(request, id=0):
 
         if vstatus:
             serializer.save()
-            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+            return JsonResponse({"isSuccess": True, "detail": serializer.data}, status=200)
         else:
             return JsonResponse(
-                {"status": vstatus,
+                {"isSuccess": vstatus,
                  "error": str(verror)
                  }, status=200)
 
@@ -414,10 +414,10 @@ def orgEventCompanyDetails(request, id=0):
 
         if vstatus:
             serializer.save()
-            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+            return JsonResponse({'message': "Inserted Successfully", "isSuccess": True, "detail": serializer.data}, status=200)
         else:
             return JsonResponse(
-                {"status": vstatus,
+                {"isSuccess": vstatus,
                  "error": str(verror)
                  }, status=200)
 
@@ -437,10 +437,10 @@ def orgEventCompanyImage(request, id=0):
 
         if vstatus:
             serializer.save()
-            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+            return JsonResponse({'message': "Inserted Successfully", "isSuccess": True, "detail": serializer.data}, status=200)
         else:
             return JsonResponse(
-                {"status": vstatus,
+                {"isSuccess": vstatus,
                  "error": str(verror)
                  }, status=200)
 
@@ -476,10 +476,10 @@ def orgEventCompanyVideo(request, id=0):
 
         if vstatus:
             serializer.save()
-            return JsonResponse({"status": True, "detail": serializer.data}, status=200)
+            return JsonResponse({'message': "Inserted Successfully", "isSuccess": True, "detail": serializer.data}, status=200)
         else:
             return JsonResponse(
-                {"status": vstatus,
+                {"isSuccess": vstatus,
                  "error": str(verror)
                  }, status=200)
 

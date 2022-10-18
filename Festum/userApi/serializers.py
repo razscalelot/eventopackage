@@ -486,6 +486,47 @@ class EventTypeSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrgEventTypeSerializers(serializers.ModelSerializer):
+    image = eventimageSerializers(read_only=True, many=True)
+    video = eventvideoSerializers(read_only=True, many=True)
+    user_id = RegistrationSerializer(read_only=True)
+    categoryId = EventCategorySerializers(read_only=True)
+    serivceId = addserviceevSerializers(read_only=True)
+    placeId = addplaceevSerializers(read_only=True)
+    personal_details = serializers.SerializerMethodField()
+    company_details = serializers.SerializerMethodField()
+    place_event = Place_EventSerializers(read_only=True, many=True)
+
+    @staticmethod
+    def get_company_details(obj):
+        company = EventCompanyDetails.objects.filter(eventId=obj.eventId)
+        company_details = EventCompanyDetailsSerializer(company, many=True)
+        return company_details.data
+
+    @staticmethod
+    def get_place_event(obj):
+        p_event = Place_Events.objects.filter(event=obj.eventId)
+        place_event = Place_EventSerializers(p_event, many=True)
+        return place_event.data
+
+    @staticmethod
+    def get_personal_details(obj):
+        personal = EventPersonalDetails.objects.filter(eventId=obj.eventId)
+        personal_details = EventPersonalDetailsSerializer(personal, many=True)
+        return personal_details.data
+
+    @staticmethod
+    def get_placeId(obj):
+        place = Add_Place_ev.objects.filter(event_id=obj.placeId)
+        placeId = addplaceevSerializers(place, many=True)
+        return placeId.data
+
+    class Meta:
+        model = EventType
+        fields =  ('eventId', 'event_type', 'display_name', 'live', 'image',
+                  'video', 'user_id', 'categoryId', 'serivceId', 'placeId', 'personal_details', 'company_details',
+                  'place_event', 'is_active', 'timestampe')
+
 class createEventSerializers(serializers.ModelSerializer):
     image = eventimageSerializers(read_only=True, many=True)
     video = eventvideoSerializers(read_only=True, many=True)
