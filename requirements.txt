@@ -154,6 +154,6 @@ vine==5.0.0
 wcwidth==0.2.5
 websocket-client==1.2.1
 websockets==10.1
-win10toast==0.9
+# win10toast==0.9
 wsproto==1.0.0
 zope.interface==5.4.0
