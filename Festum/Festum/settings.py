@@ -119,7 +119,7 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'festum',
+        'NAME': 'festum-old',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',

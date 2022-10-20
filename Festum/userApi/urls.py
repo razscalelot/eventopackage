@@ -51,6 +51,9 @@ urlpatterns = [
 
     url(r'redeem$', views.RedeemCoinsApi, name="redeem"),
     
+    url(r'org/discount$', org.OrgDiscountView, name="OrgDiscountView"),
+    url(r'org/discount/([0-9a-zA-Z]+)$', org.OrgDiscountView, name="OrgDiscountView"),
+    
     url(r'discount$', org.DiscountView, name="DiscountView"),
     url(r'discount/([0-9a-zA-Z]+)$', org.DiscountView, name="DiscountView"),
 
@@ -78,9 +81,14 @@ urlpatterns = [
     url(r'event/type', org.orgEventTypeView, name="orgEventTypeView"),
     
     url(r'add_place_event$', org.event_place, name="add_place_event"),
+    url(r'add_place_event/([0-9a-zA-Z]+)$', org.event_place, name="add_place_event"),
+
     url(r'create_event$', org.craete_event, name="create_event"),
     url(r'create_event/([0-9a-zA-Z]+)$', org.craete_event, name="create_event"),
-    url(r'add_place_event/([0-9a-zA-Z]+)$', org.event_place, name="add_place_event"),
+    
+    url(r'add_service_event/image$', org.event_service_image, name="event_service_image"),
+    url(r'add_service_event/image/([0-9a-zA-Z]+)$', org.event_service_image, name="event_service_image"),
+
     url(r'add_service_event$', org.event_service, name="add_service_event"),
     url(r'add_service_event/([0-9a-zA-Z]+)$', org.event_service, name="add_service_event"),
     url(r'service_list$', org.event_service_list, name="add_service_event"),

@@ -1,0 +1,41 @@
+version: '3.8.8'
+
+services:
+  mysql:
+    image: mysql:8.0.16
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=root
+      - MYSQL_PASSWORD=root
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_general_ci
+    container_name: mysql
+    ports:
+      - '3333:3306'
+    volumes:
+      - dbdata:/var/lib/mysql
+  djangoapp:
+    build: .
+    volumes:
+      - ./Festum:/src
+      - ./Festum/static:/src/static
+      - ./Festum/media:/src/media
+  nginx:
+    image: nginx:1.13
+    ports:
+      - 8080:80
+    expose:
+      - '8080'
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d
+      - ./Festum/static:/src/static
+      - ./Festum/media:/src/media
+    depends_on: 
+      - djangoapp
+      - mysql
+    links:
+      - djangoapp
+volumes:
+  myFirstProject:
+  static:
+  media:
+  dbdata:

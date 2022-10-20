@@ -218,27 +218,34 @@ class Discounts(models.Model):
     discount_type = models.CharField(max_length=50, choices=DISCOUNT_TYPE)
     discount = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
-    is_active = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.discount
+
 
 
 class OrgDiscounts(models.Model):
-    orgdiscountsId = models.AutoField(primary_key=True)
-    orguser = models.ForeignKey(User, related_name='user',
-                             on_delete=models.CASCADE)
-    orgequipment = models.ForeignKey(
-        Add_service_ev, related_name='orgequipment', on_delete=models.CASCADE, null=True, blank=True)
-    orgdiscount_id = models.ForeignKey(Discounts, on_delete=models.CASCADE)
-    orgdiscount = models.CharField(max_length=100)    
-    orgdescription = models.TextField(blank=True, null=True)
-    is_active = models.BooleanField(default=False)
+    event_id = models.ForeignKey('EventType',  on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    discount_type = models.CharField(max_length=50, choices=DISCOUNT_TYPE)
+    discount = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.discount
+        return str(self.discount)
+
+
+class OrgEquipmentId(models.Model):
+    orgdiscount_id = models.ForeignKey(OrgDiscounts, on_delete=models.CASCADE)
+    equipment_id = models.ForeignKey(Add_service_ev, on_delete=models.CASCADE)    
+    is_active = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return str(self.equipment_id)
 
 
 SELECTED_BUSINESS = {
@@ -253,7 +260,7 @@ class EventType(models.Model):
     user_id = models.ForeignKey(User, related_name='user_id', on_delete=models.CASCADE)
     event_type = models.CharField(
         max_length=50, choices=SELECTED_BUSINESS, default='places')
-    categoryId = models.ForeignKey(
+    category_id = models.ForeignKey(
         EventCategory, related_name='category', on_delete=models.CASCADE)
     display_name = models.CharField(max_length=50)   
     live = models.BooleanField(default=False) 

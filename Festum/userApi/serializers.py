@@ -328,7 +328,26 @@ class ServicSerializers(serializers.ModelSerializer):
         extra_kwargs = {'id': {'read_only': True}}
 
 
+
+class addserviceimageSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceImage
+        fields = [
+            'id',
+            'service',
+            'image',
+        ]
+        extra_kwargs = {'id': {'read_only': True}}
+
+
 class addserviceevSerializers(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    
+    @staticmethod
+    def get_image(obj):
+        image_id = ServiceImage.objects.filter(service_id=obj.Id)
+        image = addserviceimageSerializers(image_id, many=True)
+        return image.data
     class Meta:
         model = Add_service_ev
         fields = [
@@ -337,6 +356,8 @@ class addserviceevSerializers(serializers.ModelSerializer):
             'service_name',
             'service_price',
             'service_price_type',
+            'service_quantity',
+            'image',
             'service_desc',
         ]
         extra_kwargs = {'id': {'read_only': True}}
@@ -454,11 +475,30 @@ class DiscountSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrgEquipmentIdSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = OrgEquipmentId
+        fields = '__all__'
+
+
 class OrgDiscountSerializers(serializers.ModelSerializer):
+    equipment_id = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_equipment_id(obj):
+        discount = OrgEquipmentId.objects.filter(orgdiscount_id=obj.id, orgdiscount_id_id__user_id_id=obj.user_id)
+        print('discount', discount)
+        equipment_id = OrgEquipmentIdSerializers(discount, many=True)
+        # equipment_id = []
+        # for i in equipment.data:
+        #     seat = SeatingArrangementBooking.objects.filter(id=int(i['equipment_id']))
+        #     equipment = SeatingArrangementBookingSerializer(seat, many=True)
+        #     equipment_id.append(equipment.data)
+        return equipment_id.data
+
     class Meta:
         model = OrgDiscounts
-        fields = '__all__'
-        # fields = ('orguser', 'orgdiscount', 'orgequipment', 'orgdescription', 'orgdiscount_id')
+        fields = ('id', 'event_id', 'user_id', 'discount_type', 'discount', 'equipment_id')
 
 
 class EventCategorySerializers(serializers.ModelSerializer):
