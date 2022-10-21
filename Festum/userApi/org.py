@@ -248,7 +248,10 @@ def liveEvent(request, id):
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def orgeventApi(request, id=0):
     user = request._user
+    event_type = request.GET.get('event_type')
+    print('event_type', event_type)
     if request.method == 'GET':
+        print('if')
         user = request._user
         if id != 0:
             event = EventType.objects.filter(
@@ -263,7 +266,7 @@ def orgeventApi(request, id=0):
 
                 data = events_serializer.data
                 for i in data:
-                    catid = i['categoryId']
+                    catid = i['category_id']
 
                     if catid == clue:
                         catdata = EventCategory.objects.filter(
@@ -273,7 +276,7 @@ def orgeventApi(request, id=0):
 
                         cadata = catserializers.data
                         for j in cadata:
-                            category = j["category"]
+                            category = j["categoryId"]
                         ev = EventType.objects.filter(
                             user_id=user.userId, eventId=id)
                         for e in ev:
@@ -285,7 +288,9 @@ def orgeventApi(request, id=0):
                         event, many=True)
 
         else:
-            event = EventType.objects.filter(user_id=user.userId)
+            print('else')
+            print('event_type', event_type)
+            event = EventType.objects.filter(user_id=user.userId, event_type=event_type)
             events_serializer = OrgEventTypeSerializers(event, many=True)
 
             catdata = EventCategory.objects.all()
@@ -296,7 +301,7 @@ def orgeventApi(request, id=0):
 
                 data = events_serializer.data
                 for i in data:
-                    catid = i['categoryId']
+                    catid = i['category_id']
 
                     if catid == clue:
                         catdata = EventCategory.objects.filter(
@@ -306,13 +311,13 @@ def orgeventApi(request, id=0):
 
                         cadata = catserializers.data
                         for j in cadata:
-                            category = j["category"]
+                            category = j["categoryId"]
                         ev = EventType.objects.filter(
-                            user_id=user.userId, categoryId=catid)
+                            user_id=user.userId, category_id=catid)
                         for e in ev:
                             e.category = category
                             e.save()
-                    event = EventType.objects.filter(user_id=user.userId)
+                    event = EventType.objects.filter(user_id=user.userId, event_type=event_type)
                     events_serializer = OrgEventTypeSerializers(
                         event, many=True)
 
