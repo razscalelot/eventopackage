@@ -121,7 +121,6 @@ def adminRegistration(request):
                 'data': user,
                 'isSuccess': False
             })
-        
 
 
 @api_view(['POST', ])
@@ -219,35 +218,43 @@ def customerRegistration(request):
 @api_view(['POST', ])
 def sms(request):
     if request.method == 'POST':
-        data = request.data
-        phone = data["phone"]
-        number = phone.replace("+91", "")
-        user = User.objects.filter(phone_no=str(number))
-        if not user.exists():
-            otp = generateOTP()
-            account_sid = TWILIO_ACCOUNT_SID
-            auth_token = TWILIO_AUTH_TOKEN
-            client = Client(account_sid, auth_token)
+        try:
+            data = request.data
+            phone = data["phone"]
+            number = phone.replace("+91", "")
+            user = User.objects.filter(phone_no=str(number))
+            if not user.exists():
+                otp = generateOTP()
+                # account_sid = TWILIO_ACCOUNT_SID
+                # auth_token = TWILIO_AUTH_TOKEN
+                # client = Client(account_sid, auth_token)
 
-            message = client.messages.create(
-                messaging_service_sid='MGcfc060d9482ac8c1591396b038a3ab22',
-                # from_='+19377212460',
-                to=phone,
-                body="Dear User,\n"+otp + \
-                " is your one time password (OTP). Please enter the OTP to proceed.\nThank you,\nTeam EventoPackage"
-            )
-            OtpLog.objects.create(mobile=phone, otp=otp)
+                # message = client.messages.create(
+                #     messaging_service_sid='MGcfc060d9482ac8c1591396b038a3ab22',
+                #     # from_='+19377212460',
+                #     to=phone,
+                #     body="Dear User,\n"+otp + \
+                #     " is your one time password (OTP). Please enter the OTP to proceed.\nThank you,\nTeam EventoPackage"
+                # )
+                OtpLog.objects.create(mobile=phone, otp=otp)
 
+                return JsonResponse(
+                    {'message': "OTP is sended via SMS",
+                     'data': {'phone': phone, 'OTP': otp},
+                     'isSuccess': True
+                     }, status=201)
+            else:
+                return JsonResponse(
+                    {'message': "Please enter valide phone number",
+                     'data': 0,
+                     'isSuccess': False
+                     }, status=201)
+        except Exception:
             return JsonResponse(
-                {'message': "OTP is sended via SMS",
-                    'data': {'phone': phone, 'OTP': otp},
-                    'isSuccess': True
-                }, status=201)
-    return JsonResponse(
-        {'message': "Please enter valide phone number",
-            'data': 0,
-            'isSuccess': False
-         }, status=201)
+                {'message': "Something went wrong.",
+                 'data': 0,
+                 'isSuccess': False
+                 }, status=201)
 
 
 @api_view(['POST', ])
@@ -1053,7 +1060,6 @@ def ticketApi(request, id=0):
         'data': '0',
         'isSuccess': False
     }, status=400)
-
 
 
 @api_view(['GET'])
