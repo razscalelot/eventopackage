@@ -26,5 +26,5 @@ bot = ChatBot(   name='EventoPackage' ,read_only = True,
 trainer = ChatterBotCorpusTrainer(bot)
 
 trainer.train(
-    'userApi/conversations.yml'
+    # 'userApi/conversations.yml'
 )
