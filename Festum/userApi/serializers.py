@@ -530,7 +530,7 @@ class OrgEventTypeSerializers(serializers.ModelSerializer):
     image = eventimageSerializers(read_only=True, many=True)
     video = eventvideoSerializers(read_only=True, many=True)
     user_id = RegistrationSerializer(read_only=True)
-    # categoryId = EventCategorySerializers(read_only=True)
+    category_id = EventCategorySerializers(read_only=True)
     serivceId = addserviceevSerializers(read_only=True)
     placeId = addplaceevSerializers(read_only=True)
     personal_details = serializers.SerializerMethodField()

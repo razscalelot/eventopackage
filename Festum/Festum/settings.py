@@ -115,36 +115,36 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# pymysql.install_as_MySQLdb()
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'festum',
-#         'USER': 'root',
-#         'PASSWORD': '',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#         'OPTIONS': {
-#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-#         }
-#     }
-# }
-
-
 pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'eventopackage',
-        'USER': 'evento',
-        'PASSWORD': 'M$%Z5LcbzwsA',
-        'HOST': 'db.festumevento.com',
+        'NAME': 'festum',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         }
     }
 }
+
+
+# pymysql.install_as_MySQLdb()
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'eventopackage',
+#         'USER': 'evento',
+#         'PASSWORD': 'M$%Z5LcbzwsA',
+#         'HOST': 'db.festumevento.com',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+#         }
+#     }
+# }
 
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 

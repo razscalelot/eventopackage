@@ -1,8 +1,5 @@
-from signal import valid_signals
 from django.db.models import Q
-from requests import delete
-from sqlalchemy import true
-from yaml import serialize
+import math
 from userApi.decorater import allowuser
 from rest_framework.parsers import JSONParser
 from rest_framework.decorators import api_view, permission_classes
@@ -251,78 +248,28 @@ def orgeventApi(request, id=0):
     event_type = request.GET.get('event_type')
     print('event_type', event_type)
     if request.method == 'GET':
-        print('if')
+        limit = int(request.GET.get('limit', 5))
+        page = int(request.GET.get('page', 1))
         user = request._user
         if id != 0:
             event = EventType.objects.filter(
-                user_id=user.userId, eventId=id)
-            events_serializer = OrgEventTypeSerializers(event, many=True)
-
-            catdata = EventCategory.objects.all()
-            cat_serializer = EventCategorySerializers(catdata, many=True)
-            cdata = cat_serializer.data
-            for i in cdata:
-                clue = i['categoryId']
-
-                data = events_serializer.data
-                for i in data:
-                    catid = i['category_id']
-
-                    if catid == clue:
-                        catdata = EventCategory.objects.filter(
-                            categoryId=catid)
-                        catserializers = EventCategorySerializers(
-                            catdata, many=True)
-
-                        cadata = catserializers.data
-                        for j in cadata:
-                            category = j["categoryId"]
-                        ev = EventType.objects.filter(
-                            user_id=user.userId, eventId=id)
-                        for e in ev:
-                            e.category = category
-                            e.save()
-                    event = EventType.objects.filter(
-                        user_id=user.userId, eventId=id)
-                    events_serializer = OrgEventTypeSerializers(
-                        event, many=True)
-
+                user_id=user.userId, eventId=id).order_by('-eventId')
         else:
-            print('else')
-            print('event_type', event_type)
-            event = EventType.objects.filter(user_id=user.userId, event_type=event_type)
-            events_serializer = OrgEventTypeSerializers(event, many=True)
+            event = EventType.objects.filter(user_id=user.userId, event_type=event_type).order_by('-eventId')
+        total = event.count()
+        start = (page - 1) * limit
+        end = page * limit
+        events_serializer = OrgEventTypeSerializers(event[start:end], many=True)
 
-            catdata = EventCategory.objects.all()
-            cat_serializer = EventCategorySerializers(catdata, many=True)
-            cdata = cat_serializer.data
-            for i in cdata:
-                clue = i['categoryId']
-
-                data = events_serializer.data
-                for i in data:
-                    catid = i['category_id']
-
-                    if catid == clue:
-                        catdata = EventCategory.objects.filter(
-                            categoryId=catid)
-                        catserializers = EventCategorySerializers(
-                            catdata, many=True)
-
-                        cadata = catserializers.data
-                        for j in cadata:
-                            category = j["categoryId"]
-                        ev = EventType.objects.filter(
-                            user_id=user.userId, category_id=catid)
-                        for e in ev:
-                            e.category = category
-                            e.save()
-                    event = EventType.objects.filter(user_id=user.userId, event_type=event_type)
-                    events_serializer = OrgEventTypeSerializers(
-                        event, many=True)
+            
 
         return JsonResponse({
                             'message': "Data fetch Successfully",
+                            "total": total,
+                            "page": page,
+                            "last_page": math.ceil(total / limit),
+                            "next": 'next',
+                            "previous": 'previous',
                             'data': events_serializer.data,
                             'isSuccess': True
                             }, status=200)
