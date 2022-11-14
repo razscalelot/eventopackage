@@ -246,22 +246,18 @@ def liveEvent(request, id):
 def orgeventApi(request, id=0):
     user = request._user
     event_type = request.GET.get('event_type')
-    print('event_type', event_type)
     if request.method == 'GET':
         limit = int(request.GET.get('limit', 5))
         page = int(request.GET.get('page', 1))
         user = request._user
         if id != 0:
-            event = EventType.objects.filter(
-                user_id=user.userId, eventId=id).order_by('-eventId')
+            event = EventType.objects.filter(user_id=user.userId, eventId=id).order_by('-eventId')
         else:
             event = EventType.objects.filter(user_id=user.userId, event_type=event_type).order_by('-eventId')
         total = event.count()
         start = (page - 1) * limit
         end = page * limit
-        events_serializer = OrgEventTypeSerializers(event[start:end], many=True)
-
-            
+        events_serializer = OrgEventTypeSerializers(event[start:end], many=True)            
 
         return JsonResponse({
                             'message': "Data fetch Successfully",
@@ -275,8 +271,6 @@ def orgeventApi(request, id=0):
                             }, status=200)
     elif request.method == 'POST':
         request.data['e_user'] = user.userId
-        print('request.data', request.data)
-        print('personal data')
         events_serializer = addcreateEventSerializers(data=request.data)
         if events_serializer.is_valid():
             events_serializer.save()
