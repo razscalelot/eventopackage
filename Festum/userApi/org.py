@@ -251,13 +251,16 @@ def orgeventApi(request, id=0):
         page = int(request.GET.get('page', 1))
         user = request._user
         if id != 0:
-            event = EventType.objects.filter(user_id=user.userId, eventId=id).order_by('-eventId')
+            event = EventType.objects.filter(
+                user_id=user.userId, eventId=id).order_by('-eventId')
         else:
-            event = EventType.objects.filter(user_id=user.userId, event_type=event_type).order_by('-eventId')
+            event = EventType.objects.filter(
+                user_id=user.userId, event_type=event_type).order_by('-eventId')
         total = event.count()
         start = (page - 1) * limit
         end = page * limit
-        events_serializer = OrgEventTypeSerializers(event[start:end], many=True)            
+        events_serializer = OrgEventTypeSerializers(
+            event[start:end], many=True)
 
         return JsonResponse({
                             'message': "Data fetch Successfully",
@@ -271,6 +274,20 @@ def orgeventApi(request, id=0):
                             }, status=200)
     elif request.method == 'POST':
         request.data['e_user'] = user.userId
+        eventId = request.data['event_id']
+
+        for d in request.data['discountId']:
+            dis = OrgDiscounts.objects.get(id=int(d))
+            print('dis', dis)
+            EventWithDiscount.objects.update_or_create(
+                selected_discount_id=dis.id, event_id_id=eventId)
+
+        for s in request.data['serivceId']:
+            ser = Add_service_ev.objects.get(Id=int(s))
+            print('ser', ser)
+            EventWithServices.objects.update_or_create(
+                selected_service_id=ser.Id, event_id_id=eventId)
+
         events_serializer = addcreateEventSerializers(data=request.data)
         if events_serializer.is_valid():
             events_serializer.save()
@@ -613,7 +630,6 @@ def placedelete(id=0):
     places.delete()
 
 
-
 @api_view(['GET', 'PUT', 'POST', 'DELETE'])
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def OrgDiscountView(request, id=0):
@@ -624,7 +640,8 @@ def OrgDiscountView(request, id=0):
             discount = OrgDiscounts.objects.filter(
                 id=id, user_id=user, event_id=int(request.GET.get('event_id')))
         else:
-            discount = OrgDiscounts.objects.filter(user_id=user, event_id=int(request.GET.get('event_id')))
+            discount = OrgDiscounts.objects.filter(
+                user_id=user, event_id=int(request.GET.get('event_id')))
         discount_serializer = OrgDiscountSerializers(discount, many=True)
         return JsonResponse({
             'message': "Data fetch Successfully",
@@ -657,9 +674,10 @@ def OrgDiscountView(request, id=0):
     #              "error": serializer.errors
     #              }, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-    if request.method == "PUT":       
+    if request.method == "PUT":
         user = request._user.userId
-        odiscount = OrgDiscounts.objects.get(id=id, event_id=int(request.GET.get('event_id')), user_id=user)            
+        odiscount = OrgDiscounts.objects.get(
+            id=id, event_id=int(request.GET.get('event_id')), user_id=user)
         odiscount.equipment_id_id = request.data['equipment_id']
         odiscount.discount = request.data['discount']
         if odiscount:
@@ -669,7 +687,8 @@ def OrgDiscountView(request, id=0):
                 u = OrgEquipmentId.objects.filter(orgdiscount_id__user_id=user)
                 u.delete()
                 for i in request.data['equipment_id']:
-                    OrgEquipmentId.objects.update_or_create(orgdiscount_id_id=discount_serializer.data['id'], equipment_id_id=i)
+                    OrgEquipmentId.objects.update_or_create(
+                        orgdiscount_id_id=discount_serializer.data['id'], equipment_id_id=i)
                 serializer = OrgDiscountSerializers(odiscount)
                 return JsonResponse({
                     'message': "Updated Successfully",
@@ -677,17 +696,15 @@ def OrgDiscountView(request, id=0):
                     'isSuccess': True
                 }, status=200)
             return JsonResponse({
-                    'message': "Updated Successfully",
-                    'data': discount_serializer.data,
-                    'isSuccess': True
-                }, status=200)
+                'message': "Updated Successfully",
+                'data': discount_serializer.data,
+                'isSuccess': True
+            }, status=200)
         return JsonResponse({
             'message': "Insertion Faild",
             'data': discount_serializer.errors,
             'isSuccess': False
         }, status=200)
-
-
 
 
 @api_view(['GET', 'PUT', 'POST', 'DELETE'])
@@ -722,10 +739,10 @@ def DiscountView(request, id=0):
             return JsonResponse({"isSuccess": True, "data": serializer.data}, status=201)
         else:
             return JsonResponse({
-                 "message": "Insertion Faild",
-                 "data": serializer.errors,
+                "message": "Insertion Faild",
+                "data": serializer.errors,
                 "isSuccess": vstatus
-                 }, status=406)
+            }, status=406)
 
     elif request.method == 'PUT':
         discount = Discounts.objects.get(discountsId=id)

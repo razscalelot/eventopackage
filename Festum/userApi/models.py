@@ -258,25 +258,36 @@ SELECTED_BUSINESS = {
 class EventType(models.Model):
     eventId = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(User, related_name='user_id', on_delete=models.CASCADE)
-    event_type = models.CharField(
-        max_length=50, choices=SELECTED_BUSINESS, default='places')
-    category_id = models.ForeignKey(
-        EventCategory, related_name='category', on_delete=models.CASCADE)
+    event_type = models.CharField(max_length=50, choices=SELECTED_BUSINESS, default='places')
+    category_id = models.ForeignKey(EventCategory, related_name='category', on_delete=models.CASCADE)
     display_name = models.CharField(max_length=50)   
     live = models.BooleanField(default=False) 
     is_active = models.BooleanField(default=True)
     timestampe = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.event_type   
+        return self.event_type
 
+
+class EventWithDiscount(models.Model):
+    selected_discount = models.ForeignKey(OrgDiscounts, related_name='selected_discount', on_delete=models.CASCADE)
+    event_id = models.ForeignKey(EventType, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    timestampe = models.DateTimeField(auto_now_add=True)
+
+
+class EventWithServices(models.Model):
+    selected_service = models.ForeignKey(Add_service_ev, related_name='selected_service', on_delete=models.CASCADE)
+    event_id = models.ForeignKey(EventType, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    timestampe = models.DateTimeField(auto_now_add=True)
 
 
 class createEvent(models.Model):
     event_id = models.ForeignKey(EventType, related_name='event_id', on_delete=models.CASCADE)
     e_user = models.ForeignKey(User, on_delete=models.CASCADE)
-    serivceId = models.ForeignKey(Add_service_ev, related_name='service_id', on_delete=models.CASCADE)
-    discountId = models.ForeignKey(OrgDiscounts, related_name='discount_id', on_delete=models.CASCADE)
+    # serivceId = models.ForeignKey(Add_service_ev, related_name='service_id', on_delete=models.CASCADE, null=True, blank=True)
+    # discountId = models.ForeignKey(OrgDiscounts, related_name='discount_id', on_delete=models.CASCADE, null=True, blank=True)
     t_and_c = models.TextField(max_length=5000)
     facebook = models.CharField(max_length=255, blank=True, null=True)
     twitter = models.CharField(max_length=255, blank=True, null=True)

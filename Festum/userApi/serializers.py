@@ -526,14 +526,35 @@ class EventTypeSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class EventWithDiscountSerializers(serializers.ModelSerializer):
+    selected_discount = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_selected_discount(obj):
+        discount = OrgDiscounts.objects.filter(id=obj.selected_discount_id)
+        selected_discount = OrgDiscountSerializers(discount, many=True)
+        return selected_discount.data
+    
+    class Meta:
+        model = EventWithDiscount
+        fields = ('id', 'selected_discount')
+
+
+class EventWithServicesSerializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = EventWithServices
+        fields = '__all__'
+
+
 class OrgEventTypeSerializers(serializers.ModelSerializer):
     image = eventimageSerializers(read_only=True, many=True)
     video = eventvideoSerializers(read_only=True, many=True)
     user_id = RegistrationSerializer(read_only=True)
     category_id = EventCategorySerializers(read_only=True)
-    serivceId = serializers.SerializerMethodField()
+    # serivceId = serializers.SerializerMethodField()
     discountId = serializers.SerializerMethodField()
-    # placeId = addplaceevSerializers(read_only=True)
+    selected_discount = EventWithDiscountSerializers(read_only=True, many=True)
     personal_details = serializers.SerializerMethodField()
     company_details = serializers.SerializerMethodField()
     place_event = serializers.SerializerMethodField()
@@ -568,10 +589,16 @@ class OrgEventTypeSerializers(serializers.ModelSerializer):
         discountId = OrgDiscountSerializers(discount, many=True)
         return discountId.data
 
+    # @staticmethod
+    # def get_selected_discount(obj):
+    #     discount = EventWithDiscount.objects.filter(event_id=obj.eventId)
+    #     selected_discount = EventWithDiscountSerializers(discount, many=True)
+    #     return selected_discount.data
+
     class Meta:
         model = EventType
         fields =  ('eventId', 'event_type', 'display_name', 'live', 'image',
-                  'video', 'user_id', 'category_id', 'serivceId', 'discountId', 'personal_details', 'company_details',
+                  'video', 'user_id', 'category_id', 'discountId', 'selected_discount', 'personal_details', 'company_details',
                   'place_event', 'is_active', 'timestampe')
 
 class createEventSerializers(serializers.ModelSerializer):
