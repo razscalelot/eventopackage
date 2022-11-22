@@ -274,19 +274,19 @@ def orgeventApi(request, id=0):
                             }, status=200)
     elif request.method == 'POST':
         request.data['e_user'] = user.userId
-        # eventId = request.data['event_id']
+        eventId = request.data['event_id']
 
-        # for d in request.data['discountId']:
-        #     dis = OrgDiscounts.objects.get(id=int(d))
-        #     print('dis', dis)
-        #     EventWithDiscount.objects.update_or_create(
-        #         selected_discount_id=dis.id, event_id_id=eventId)
+        for d in request.data['discountId']:
+            dis = OrgDiscounts.objects.get(id=int(d))
+            print('dis', dis)
+            EventWithDiscount.objects.update_or_create(
+                selected_discount_id=dis.id, event_id_id=eventId)
 
-        # for s in request.data['serivceId']:
-        #     ser = Add_service_ev.objects.get(Id=int(s))
-        #     print('ser', ser)
-        #     EventWithServices.objects.update_or_create(
-        #         selected_service_id=ser.Id, event_id_id=eventId)
+        for s in request.data['serivceId']:
+            ser = Add_service_ev.objects.get(Id=int(s))
+            print('ser', ser)
+            EventWithServices.objects.update_or_create(
+                selected_service_id=ser.Id, event_id_id=eventId)
 
         events_serializer = addcreateEventSerializers(data=request.data)
         if events_serializer.is_valid():

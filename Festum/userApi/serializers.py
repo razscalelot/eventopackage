@@ -542,10 +542,17 @@ class EventWithDiscountSerializers(serializers.ModelSerializer):
 
 
 class EventWithServicesSerializers(serializers.ModelSerializer):
+    selected_service = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_selected_service(obj):
+        service = Add_service_ev.objects.filter(Id=obj.selected_service_id)
+        selected_service = addserviceevSerializers(service, many=True)
+        return selected_service.data
 
     class Meta:
         model = EventWithServices
-        fields = '__all__'
+        fields = ('id', 'selected_service')
 
 class createEventSerializers2(serializers.ModelSerializer):
     class Meta:
@@ -569,7 +576,8 @@ class OrgEventTypeSerializers(serializers.ModelSerializer):
     # serivceId = serializers.SerializerMethodField()
     capacity = serializers.SerializerMethodField()
     discountId = serializers.SerializerMethodField()
-    selected_discount = EventWithDiscountSerializers(read_only=True, many=True)
+    selected_discount = serializers.SerializerMethodField()
+    selected_service = serializers.SerializerMethodField()
     personal_details = serializers.SerializerMethodField()
     company_details = serializers.SerializerMethodField()
     place_event = serializers.SerializerMethodField()
@@ -613,16 +621,22 @@ class OrgEventTypeSerializers(serializers.ModelSerializer):
         discountId = OrgDiscountSerializers(discount, many=True)
         return discountId.data
 
-    # @staticmethod
-    # def get_selected_discount(obj):
-    #     discount = EventWithDiscount.objects.filter(event_id=obj.eventId)
-    #     selected_discount = EventWithDiscountSerializers(discount, many=True)
-    #     return selected_discount.data
+    @staticmethod
+    def get_selected_discount(obj):
+        discount = EventWithDiscount.objects.filter(event_id=obj.eventId)
+        selected_discount = EventWithDiscountSerializers(discount, many=True)
+        return selected_discount.data
+
+    @staticmethod
+    def get_selected_service(obj):
+        service = EventWithServices.objects.filter(event_id=obj.eventId)
+        selected_service = EventWithServicesSerializers(service, many=True)
+        return selected_service.data
 
     class Meta:
         model = EventType
         fields =  ('eventId', 'event_type', 'display_name', 'live', 'image',
-                  'video', 'user_id', 'category_id', 'discountId', 'capacity', 'selected_discount', 'personal_details', 'company_details',
+                  'video', 'user_id', 'category_id', 'discountId', 'capacity', 'selected_discount', 'selected_service', 'personal_details', 'company_details',
                   'place_event', 'social', 'is_active', 'timestampe')
 
 class createEventSerializers(serializers.ModelSerializer):

@@ -37,7 +37,6 @@ import datetime
 
 
 def createUser(serializeruser):
-    print('serializeruser', serializeruser)
     register = serializeruser
     data = {}
     if register.is_valid():
@@ -149,22 +148,37 @@ def subAdminRegistration(request):
 @api_view(['POST', ])
 def organizerRegistration(request):
     if request.method == 'POST':
-        print('call')
-        if request.data.get("refer_code") is None:
-            request.data["refer_code"] = ""
-        print('request.data', request.data)
-        user = createUser(OrganizerRegistrationSerializer(data=request.data))
-        print('user', user)
-        if user == True:
-            return JsonResponse({
-                'message': "Register successfully",
-                'data': 1,
-                'isSuccess': True
-            }, status=201)
+        phone = User.objects.filter(
+            phone_no=request.data['phone_no'], email=request.data['email'])
+        if not phone.exists():
+            # verify_phone = OtpLog.objects.filter(
+            #     mobile=request.data["phone_no"], is_verify=True)
+            # if not verify_phone:
+            #     return JsonResponse(
+            #         {"error": "Mobile number is not verified.",
+            #          "isSuccess": False,
+            #          }, status=201)
+
+            if request.data.get("refer_code") is None:
+                request.data["refer_code"] = ""
+            user = createUser(
+                OrganizerRegistrationSerializer(data=request.data))
+            if user == True:
+                return JsonResponse({
+                    'message': "Register successfully",
+                    'data': 1,
+                    'isSuccess': True
+                }, status=201)
+            else:
+                return JsonResponse({
+                    'message': "Registration faild",
+                    'data': user,
+                    'isSuccess': False
+                })
         else:
             return JsonResponse({
-                'message': "Registration faild",
-                'data': user,
+                'message': "User already exist.",
+                'data': 0,
                 'isSuccess': False
             })
 
@@ -224,18 +238,18 @@ def sms(request):
             number = phone.replace("+91", "")
             user = User.objects.filter(phone_no=str(number))
             if not user.exists():
-                otp = generateOTP()
-                account_sid = TWILIO_ACCOUNT_SID
-                auth_token = TWILIO_AUTH_TOKEN
-                client = Client(account_sid, auth_token)
+                # otp = generateOTP()
+                # account_sid = TWILIO_ACCOUNT_SID
+                # auth_token = TWILIO_AUTH_TOKEN
+                # client = Client(account_sid, auth_token)
 
-                message = client.messages.create(
-                    messaging_service_sid='MG4f7fcbc716b63e562c7ddb3282dd2c69',
-                    from_='+19498284050',
-                    to=phone,
-                    body="Dear User,\n"+otp + \
-                    " is your one time password (OTP). Please enter the OTP to proceed.\nThank you,\nTeam EventoPackage"
-                )
+                # message = client.messages.create(
+                #     messaging_service_sid='MG4f7fcbc716b63e562c7ddb3282dd2c69',
+                #     from_='+19498284050',
+                #     to=phone,
+                #     body="Dear User,\n"+otp + \
+                #     " is your one time password (OTP). Please enter the OTP to proceed.\nThank you,\nTeam EventoPackage"
+                # )
                 OtpLog.objects.create(mobile=phone, otp=otp)
 
                 return JsonResponse(
