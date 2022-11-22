@@ -79,6 +79,9 @@ urlpatterns = [
     url(r'events_get_list/([0-9a-zA-Z]+)$', org.orggeteventApi, name="events_get_list"),
 
     url(r'event/type', org.orgEventTypeView, name="orgEventTypeView"),
+
+    url(r'event/capacity', org.orgEventCapacityView, name="orgEventCapacityView"),
+    url(r'event/capacity/([0-9a-zA-Z]+)$', org.orgEventCapacityView, name="orgEventCapacityView"),
     
     url(r'add_place_event$', org.event_place, name="add_place_event"),
     url(r'add_place_event/([0-9a-zA-Z]+)$', org.event_place, name="add_place_event"),

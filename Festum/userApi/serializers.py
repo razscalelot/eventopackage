@@ -391,6 +391,7 @@ class eventvideoSerializers(serializers.ModelSerializer):
 class EventPersonalDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventPersonalDetails
+        # fields = ('user_id', 'eventId', 'professional_skill', 'full_name', 'mobile_no', 'is_mobile_no_hidden', 'alt_mobile_no', 'email', 'is_email_hidden', 'skill_banner', 'price_type', 'flat_no', 'street', 'area', 'city', 'state', 'pincode')
         fields = '__all__'
         extra_kwargs = {'id': {'read_only': True}}
 
@@ -432,7 +433,7 @@ class EventCompanyVideoSerializer(serializers.ModelSerializer):
 
 
 class Place_EventSerializers(serializers.ModelSerializer):
-    service = ServicSerializers(read_only=True, many=True)
+    # service = ServicSerializers(read_only=True, many=True)
 
     class Meta:
         model = Place_Events
@@ -546,6 +547,19 @@ class EventWithServicesSerializers(serializers.ModelSerializer):
         model = EventWithServices
         fields = '__all__'
 
+class createEventSerializers2(serializers.ModelSerializer):
+    class Meta:
+        model = createEvent
+        # fields = ('t_and_c', 'facebook', 'twitter', 'youtube', 'pinterest', 'instagram', 'linkedin', 'calender')
+        fields = '__all__'
+
+
+class createEventSerializers2(serializers.ModelSerializer):
+     class Meta:
+        model = createEvent
+        fields =  '__all__'
+
+
 
 class OrgEventTypeSerializers(serializers.ModelSerializer):
     image = eventimageSerializers(read_only=True, many=True)
@@ -553,17 +567,27 @@ class OrgEventTypeSerializers(serializers.ModelSerializer):
     user_id = RegistrationSerializer(read_only=True)
     category_id = EventCategorySerializers(read_only=True)
     # serivceId = serializers.SerializerMethodField()
+    capacity = serializers.SerializerMethodField()
     discountId = serializers.SerializerMethodField()
     selected_discount = EventWithDiscountSerializers(read_only=True, many=True)
     personal_details = serializers.SerializerMethodField()
     company_details = serializers.SerializerMethodField()
     place_event = serializers.SerializerMethodField()
+    social = serializers.SerializerMethodField()
+
 
     @staticmethod
-    def get_serivceId(obj):
-        serivce = createEvent.objects.filter(serivceId=obj.eventId)
-        serivceId = createEventSerializers(serivce, many=True)
-        return serivceId.data
+    def get_social(obj):
+        socialId = createEvent.objects.filter(event_id=obj.eventId)
+        social = createEventSerializers2(socialId, many=True)
+        return social.data
+
+
+    @staticmethod
+    def get_capacity(obj):
+        capacityId = Place_Events.objects.filter(event_id=obj.eventId)
+        capacity = Place_EventSerializers(capacityId, many=True)
+        return capacity.data
 
     @staticmethod
     def get_company_details(obj):
@@ -598,8 +622,8 @@ class OrgEventTypeSerializers(serializers.ModelSerializer):
     class Meta:
         model = EventType
         fields =  ('eventId', 'event_type', 'display_name', 'live', 'image',
-                  'video', 'user_id', 'category_id', 'discountId', 'selected_discount', 'personal_details', 'company_details',
-                  'place_event', 'is_active', 'timestampe')
+                  'video', 'user_id', 'category_id', 'discountId', 'capacity', 'selected_discount', 'personal_details', 'company_details',
+                  'place_event', 'social', 'is_active', 'timestampe')
 
 class createEventSerializers(serializers.ModelSerializer):
     image = eventimageSerializers(read_only=True, many=True)

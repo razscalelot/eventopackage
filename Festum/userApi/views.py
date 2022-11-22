@@ -230,8 +230,8 @@ def sms(request):
                 client = Client(account_sid, auth_token)
 
                 message = client.messages.create(
-                    messaging_service_sid='VA237d68ae93303dbae36c9acb13cf0b15',
-                    # from_='+19377212460',
+                    messaging_service_sid='MG4f7fcbc716b63e562c7ddb3282dd2c69',
+                    from_='+19498284050',
                     to=phone,
                     body="Dear User,\n"+otp + \
                     " is your one time password (OTP). Please enter the OTP to proceed.\nThank you,\nTeam EventoPackage"
@@ -240,7 +240,7 @@ def sms(request):
 
                 return JsonResponse(
                     {'message': "OTP is sended via SMS",
-                     'data': {'phone': phone, 'OTP': "1234"},
+                     'data': {'phone': phone, 'OTP': otp},
                      'isSuccess': True
                      }, status=201)
             else:
@@ -253,27 +253,23 @@ def sms(request):
             print('e', e)
             # return JsonResponse(
             #     {'message': "Something went wrong.",
-            #      'data': e,
-            #      'isSuccess': False
-            #      }, status=201)
+            #      'data': 0, 'isSuccess': False }, status=201)
 
 
 @api_view(['POST', ])
 def verifyOtp(request):
     if request.method == "POST":
-        print('call')
         otp = request.data["otp"]
 
         if otp:
-            # otp_log = OtpLog.objects.filter(otp=str(otp))
-            # if otp_log.exists():
-            #     otp_log = otp_log[0]
-            #     otp_log.is_verify = True
-            #     otp_log.save()
-            #     return JsonResponse({"status": True, })
-            # else:
-            #     return JsonResponse({"status": False, })
-            return JsonResponse({"status": True, })
+            otp_log = OtpLog.objects.filter(otp=str(otp))
+            if otp_log.exists():
+                otp_log = otp_log[0]
+                otp_log.is_verify = True
+                otp_log.save()
+                return JsonResponse({"status": True, })
+            else:
+                return JsonResponse({"status": False, })
         else:
             return JsonResponse(
                 {
@@ -286,7 +282,6 @@ def verifyOtp(request):
 class CustomAuthToken(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):
-        print('request', request.data)
         serializer = self.serializer_class(
             data=request.data, context={'request': request})
 

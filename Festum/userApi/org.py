@@ -43,9 +43,9 @@ def orgEventTypeView(request):
     if request.method == 'GET':
         if id:
             eventtype = EventType.objects.filter(
-                is_active=True, user_id=user, eventId=int(id))
+                is_active=True, user_id=user, eventId=int(id)).order_by('-eventId')
         else:
-            eventtype = EventType.objects.filter(is_active=True, user_id=user)
+            eventtype = EventType.objects.filter(is_active=True, user_id=user).order_by('-eventId')
         serialize = EventTypeSerializers(eventtype, many=True)
         return JsonResponse({
             'message': "Data fetch Successfully",
@@ -335,6 +335,16 @@ def orgeventApi(request, id=0):
 @api_view(['POST', 'GET', 'PUT', 'DELETE'])
 @allowuser(allowrole=['0', '1', '2', '3', '4'])
 def orgEventPersonalDetails(request, id=0):
+    if request.method == "GET":
+        personaldetail = EventPersonalDetails.objects.filter(
+            eventId=request.GET.get('eventId', 0))
+        serializer = EventPersonalDetailsSerializer(personaldetail, many=True)
+        return JsonResponse({
+            'message': "Data fetch Successfully",
+            'data': serializer.data,
+            'isSuccess': True
+        }, status=200)
+
     if request.method == "POST":
         print('call')
         vstatus = False
@@ -354,6 +364,27 @@ def orgEventPersonalDetails(request, id=0):
                 {"isSuccess": vstatus,
                  "error": str(verror)
                  }, status=200)
+
+    elif request.method == 'PUT':
+        personaldetail = EventPersonalDetails.objects.filter(
+            eventId=request.GET.get('eventId'))
+        print('personaldetail', personaldetail)
+        print('request.data', request.data)
+        # request.data['eventId'] = 
+        serializer = EventPersonalDetailsSerializer(personaldetail, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            print('serializer.data', serializer.data)
+            serializer.save()
+            return JsonResponse({
+                'message': "Updated Successfully",
+                'data': serializer.data,
+                'isSuccess': True
+            }, status=200)
+        return JsonResponse({
+            'message': "Insertion Faild",
+            'data': serializer.errors,
+            'isSuccess': False
+        }, status=200)
 
 
 @api_view(['POST', 'GET', 'PUT', 'DELETE'])
@@ -989,6 +1020,72 @@ def craete_event(request, id=0):
         return JsonResponse({
             'message': "Deleted Successfully",
             'data': "1",
+            'isSuccess': True
+        }, status=200)
+    return JsonResponse({
+        'message': "Connection error",
+        'data': '0',
+        'isSuccess': False
+    }, status=400)
+
+
+
+
+@api_view(['GET', 'PUT', 'POST', 'DELETE'])
+@allowuser(allowrole=['0', '1', '2', '3', '4'])
+def orgEventCapacityView(request, id=0):
+    if request.method == 'GET':
+        event_capacity = Place_Events.objects.filter(event_id=request.GET.get('event_id'), is_active=True)
+        serializer = Place_EventSerializers(event_capacity, many=True)
+        return JsonResponse({
+            'message': "Data fetch Successfully.",
+            'data': serializer.data,
+            'isSuccess': True
+        }, status=200)
+
+    elif request.method == 'POST':
+        print('req post', request.data)
+        vstatus = False
+        verror = None
+        serializer = Place_EventSerializers(data=request.data)
+
+        try:
+            vstatus = serializer.is_valid(raise_exception=True)
+        except Exception as error:
+            verror = error
+
+        if vstatus:
+            model_obj = serializer.save()
+            return JsonResponse({"isSuccess": True, "data": serializer.data}, status=201)
+        else:
+            return JsonResponse({
+                "message": "Insertion Faild",
+                "data": serializer.errors,
+                "isSuccess": vstatus
+            }, status=406)
+
+    elif request.method == 'PUT':
+        event_capacity = Place_Events.objects.get(event_id=request.data['event'])
+        serializer = Place_EventSerializers(event_capacity, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse({
+                'message': "Updated Successfully",
+                'data': serializer.data,
+                'isSuccess': True
+            }, status=200)
+        return JsonResponse({
+            'message': "Insertion Faild",
+            'data': serializer.errors,
+            'isSuccess': False
+        }, status=200)
+
+    elif request.method == 'DELETE':
+        event_capacity = Place_Events.objects.get(event_id=request.GET.get('event_id'))
+        event_capacity.is_active = False
+        event_capacity.save()
+        return JsonResponse({
+            'message': "Deleted Successfully",
             'isSuccess': True
         }, status=200)
     return JsonResponse({

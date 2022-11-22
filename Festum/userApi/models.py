@@ -301,7 +301,7 @@ class createEvent(models.Model):
     timestampe = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.display_name
+        return self.event_id.display_name
 
 
 # class createEvent(models.Model):
